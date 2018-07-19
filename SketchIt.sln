@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SketchIt.Api", "SketchIt.Api\SketchIt.Api.csproj", "{ABBF752C-958B-4059-A3DF-690FBA4A4457}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SketchIt.Windows", "SketchIt.Windows\SketchIt.Windows.csproj", "{05B73BDB-BD02-4C74-BECA-584BBA6D481E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SketchIt", "SketchIt\SketchIt.csproj", "{901A6DA5-CC2D-4AA2-B7D1-9AE7FE58DEDB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SketchIt.Video", "SketchIt.Video\SketchIt.Video.csproj", "{48DA9948-538C-4C47-ABB2-9B8664A16F0A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ABBF752C-958B-4059-A3DF-690FBA4A4457}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABBF752C-958B-4059-A3DF-690FBA4A4457}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABBF752C-958B-4059-A3DF-690FBA4A4457}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABBF752C-958B-4059-A3DF-690FBA4A4457}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05B73BDB-BD02-4C74-BECA-584BBA6D481E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05B73BDB-BD02-4C74-BECA-584BBA6D481E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05B73BDB-BD02-4C74-BECA-584BBA6D481E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05B73BDB-BD02-4C74-BECA-584BBA6D481E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{901A6DA5-CC2D-4AA2-B7D1-9AE7FE58DEDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{901A6DA5-CC2D-4AA2-B7D1-9AE7FE58DEDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{901A6DA5-CC2D-4AA2-B7D1-9AE7FE58DEDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{901A6DA5-CC2D-4AA2-B7D1-9AE7FE58DEDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48DA9948-538C-4C47-ABB2-9B8664A16F0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48DA9948-538C-4C47-ABB2-9B8664A16F0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48DA9948-538C-4C47-ABB2-9B8664A16F0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48DA9948-538C-4C47-ABB2-9B8664A16F0A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3BB7529A-63DC-42CF-B2E2-19E68407E5BB}
+	EndGlobalSection
+EndGlobal
