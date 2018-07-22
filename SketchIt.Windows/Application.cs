@@ -1,6 +1,7 @@
 ﻿using SketchIt.Api;
 using SketchIt.Api.Interfaces;
 using SketchIt.Api.Static;
+using System;
 
 namespace SketchIt.Windows
 {
@@ -183,7 +184,7 @@ namespace SketchIt.Windows
         /// <param name="width">The width of the rectangle that defines the arc's ellipse.</param>
         /// <param name="height">The height of the rectangle that defines the arc's ellipse.</param>
         /// <param name="start">The angle (in degrees) measured clockwise from the x-axis to the starting point of the arc.</param>
-        /// <param name="stop">The angle (in degrees) measured clockwise from the <see cref=">start"/> parameter to the ending point of the arc.</param>
+        /// <param name="stop">The angle (in degrees) measured clockwise from the <paramref name="start"/> parameter to the ending point of the arc.</param>
         public static void DrawArc(float x, float y, float width, float height, float start, float stop) => DrawArc(x, y, width, height, start, stop, (int)ArcMode.Open);
 
         /// <summary>
@@ -194,7 +195,7 @@ namespace SketchIt.Windows
         /// <param name="width">The width of the rectangle that defines the arc's ellipse.</param>
         /// <param name="height">The height of the rectangle that defines the arc's ellipse.</param>
         /// <param name="start">The angle (in degrees) measured clockwise from the x-axis to the starting point of the arc.</param>
-        /// <param name="stop">The angle (in degrees) measured clockwise from the <see cref=">start"/> parameter to the ending point of the arc.</param>
+        /// <param name="stop">The angle (in degrees) measured clockwise from the <paramref name="start"/> parameter to the ending point of the arc.</param>
         /// <param name="mode">The shape mode.</param>
         public static void DrawArc(float x, float y, float width, float height, float start, float stop, int mode) { CurrentLayer.Renderer.DrawArc(new ArcParameters(x, y, width, height, start, stop) { Mode = (ArcMode)mode }); }
 
@@ -305,10 +306,36 @@ namespace SketchIt.Windows
         public static void Clear() { CurrentLayer.Renderer.Clear(); }
 
         public static void DrawBackground(IImage image) { CurrentLayer.Renderer.DrawBackground(new BackgroundParameters(image)); }
+
+        /// <summary>
+        /// Draws the background with the specified grayscale color.
+        /// </summary>
+        /// <param name="gray">The grayscale value (0 to 255 inclusive).</param>
         public static void DrawBackground(float gray) { CurrentLayer.Renderer.DrawBackground(new BackgroundParameters(Style.GetColor(gray))); }
+
+        /// <summary>
+        /// Draws the background with the specified grayscale color and alpha value.
+        /// </summary>
+        /// <param name="gray">The grayscale value (0 to 255 inclusive).</param>
+        /// <param name="alpha">The alpha value (0 to 255 inclusive).</param>
         public static void DrawBackground(float gray, float alpha) { CurrentLayer.Renderer.DrawBackground(new BackgroundParameters(Style.GetColor(gray, alpha))); }
-        public static void DrawBackground(float r, float g, float b) { CurrentLayer.Renderer.DrawBackground(new BackgroundParameters(Style.GetColor(r, g, b))); }
-        public static void DrawBackground(float r, float g, float b, float alpha) { CurrentLayer.Renderer.DrawBackground(new BackgroundParameters(Style.GetColor(r, g, b, alpha))); }
+
+        /// <summary>
+        /// Draws the background with the specified color values (either RGB or HSB).
+        /// </summary>
+        /// <param name="v1">Value 1. Red for RGB, Hue for HSB.</param>
+        /// <param name="v2">Value 2. Green for RGB, Saturation for HSB.</param>
+        /// <param name="v3">Value 3. Blue for RGB, Brightness for HSB.</param>
+        public static void DrawBackground(float v1, float v2, float v3) { CurrentLayer.Renderer.DrawBackground(new BackgroundParameters(Style.GetColor(v1, v2, v3))); }
+
+        /// <summary>
+        /// Draws the background with the specified color values (either RGB or HSB).
+        /// </summary>
+        /// <param name="v1">Value 1. Red for RGB, Hue for HSB.</param>
+        /// <param name="v2">Value 2. Green for RGB, Saturation for HSB.</param>
+        /// <param name="v3">Value 3. Blue for RGB, Brightness for HSB.</param>
+        /// <param name="alpha">Alpha value.</param>
+        public static void DrawBackground(float v1, float v2, float v3, float alpha) { CurrentLayer.Renderer.DrawBackground(new BackgroundParameters(Style.GetColor(v1, v2, v3, alpha))); }
         public static void DrawBackground(Color color, float alpha) { CurrentLayer.Renderer.DrawBackground(new BackgroundParameters(new Color(color, alpha))); }
         public static void DrawBackground(Color color) { CurrentLayer.Renderer.DrawBackground(new BackgroundParameters(color)); }
 
@@ -433,5 +460,10 @@ namespace SketchIt.Windows
         /// </summary>
         /// <param name="values">An array of values to print.</param>
         public static void PrintLine(params object[] values) => Sketch.PrintLine(values);
+
+        public static void RunThread(string methodName, params object[] args)
+        {
+            Sketch.RunThread(methodName, args);
+        }
     }
 }

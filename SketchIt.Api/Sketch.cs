@@ -10,6 +10,7 @@ using System.Drawing.Drawing2D;
 using System.Reflection;
 using System.Text;
 using System.Timers;
+using Threading = System.Threading;
 
 namespace SketchIt.Api
 {
@@ -880,6 +881,15 @@ namespace SketchIt.Api
                 Print(valueList.ToArray());
             }
             //).Invoke();
+        }
+
+        public void RunThread(string methodName, params object[] args)
+        {
+            MethodInfo mi = _applet.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
+            Threading.ThreadStart threadStart = new Threading.ThreadStart(delegate () { mi.Invoke(_applet, args); });
+            Threading.Thread thread = new Threading.Thread(threadStart);
+
+            thread.Start();
         }
     }
 }

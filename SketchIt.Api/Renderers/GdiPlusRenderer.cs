@@ -267,15 +267,22 @@ namespace SketchIt.Api.Renderers
         {
             using (DeviceContextHandler dch = GetDeviceContextHandler())
             {
-                Rectangle rect = Style.GetAdjustedRectangle(parms);
+                try
+                {
+                    Rectangle rect = Style.GetAdjustedRectangle(parms);
 
-                if (!Style.TintParameters.Disabled)
-                {
-                    dch.DrawingSurface.DrawImage(parms.Image.Bitmap, rect.SystemRectangle, 0, 0, parms.Image.Width, parms.Image.Height, GraphicsUnit.Pixel, Style.TintParameters.ImageAttributes);
+                    if (!Style.TintParameters.Disabled)
+                    {
+                        dch.DrawingSurface.DrawImage(parms.Image.Bitmap, rect.SystemRectangle, 0, 0, parms.Image.Width, parms.Image.Height, GraphicsUnit.Pixel, Style.TintParameters.ImageAttributes);
+                    }
+                    else
+                    {
+                        dch.DrawingSurface.DrawImage(parms.Image.Bitmap, rect.SystemRectangleF);
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    dch.DrawingSurface.DrawImage(parms.Image.Bitmap, rect.SystemRectangleF);
+                    Console.WriteLine(e.Message + Environment.NewLine + e.StackTrace);
                 }
             }
         }

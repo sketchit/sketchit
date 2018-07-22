@@ -372,7 +372,7 @@ namespace SketchIt
 
             _updateTimer = new System.Timers.Timer(100);
             _updateTimer.Elapsed += UpdateTimerElapsed;
-            //_updateTimer.Start();
+            _updateTimer.Start();
         }
 
         private void UpdateTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
