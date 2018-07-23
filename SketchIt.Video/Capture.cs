@@ -58,6 +58,15 @@ namespace SketchIt.Video
             return true;
         }
 
+        public void Stop()
+        {
+            if (_started)
+            {
+                _videoCapture.Stop();
+                _started = false;
+            }
+        }
+
         private void _videoCapture_ImageGrabbed(object sender, EventArgs e)
         {
             if (_videoCapture != null)

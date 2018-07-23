@@ -402,6 +402,12 @@ namespace SketchIt.Api
         private float _penWidth = 1;
         private bool _disabled;
 
+        internal Style Style
+        {
+            get;
+            set;
+        }
+
         public ColorParameter(IImage image)
             : this(new Color())
         {
@@ -447,7 +453,7 @@ namespace SketchIt.Api
             {
                 if (Image != null)
                 {
-                    _brush = new TextureBrush(Image.Bitmap);
+                    _brush = new TextureBrush(Image.Bitmap, new RectangleF(0, 0, Image.Width, Image.Height), Style != null && Style.TintParameters.Disabled ? new System.Drawing.Imaging.ImageAttributes() : Style.TintParameters.ImageAttributes);
                 }
                 else
                 {
@@ -463,7 +469,14 @@ namespace SketchIt.Api
         {
             if (_pen == null)
             {
-                _pen = new Pen(_color.ToSystemColor(), _penWidth);
+                if (Image != null)
+                {
+                    _pen = new Pen(new TextureBrush(Image.Bitmap, new RectangleF(0, 0, Image.Width, Image.Height), Style != null && Style.TintParameters.Disabled ? new System.Drawing.Imaging.ImageAttributes() : Style.TintParameters.ImageAttributes));
+                }
+                else
+                {
+                    _pen = new Pen(_color.ToSystemColor(), _penWidth);
+                }
             }
 
             return _pen;
@@ -471,8 +484,20 @@ namespace SketchIt.Api
 
         public virtual void Dispose()
         {
-            if (_pen != null) _pen.Dispose();
-            if (_brush != null) _brush.Dispose();
+            if (_pen != null)
+            {
+                if (_pen.Brush != null)
+                {
+                    _pen.Brush.Dispose();
+                }
+
+                _pen.Dispose();
+            }
+
+            if (_brush != null)
+            {
+                _brush.Dispose();
+            }
         }
     }
 
@@ -491,6 +516,7 @@ namespace SketchIt.Api
     public class StrokeParameters : ColorParameter
     {
         public StrokeParameters(Color color) : base(color) { }
+        public StrokeParameters(IImage image) : base(image) { }
     }
 
     public class TextParameters

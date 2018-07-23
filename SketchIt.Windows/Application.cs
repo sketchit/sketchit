@@ -1,7 +1,6 @@
 ﻿using SketchIt.Api;
 using SketchIt.Api.Interfaces;
 using SketchIt.Api.Static;
-using System;
 
 namespace SketchIt.Windows
 {
@@ -355,6 +354,7 @@ namespace SketchIt.Windows
         public static void SetStroke(float r, float g, float b, float alpha) { Style.SetStroke(new StrokeParameters(Style.GetColor(r, g, b, alpha))); }
         public static void SetStroke(Color color, float alpha) { Style.SetStroke(new StrokeParameters(new Color(color, alpha))); }
         public static void SetStroke(Color color) { Style.SetStroke(new StrokeParameters(color)); }
+        public static void SetStroke(IImage image) { Style.SetStroke(new StrokeParameters(image)); }
         public static void SetNoStroke() { Style.SetNoStroke(); }
 
         public static void SetTint(float gray) { Style.SetTint(new TintParameters(Style.GetColor(gray))); }
@@ -461,6 +461,11 @@ namespace SketchIt.Windows
         /// <param name="values">An array of values to print.</param>
         public static void PrintLine(params object[] values) => Sketch.PrintLine(values);
 
+        /// <summary>
+        /// Runs the specified method in a seperate thread. Manipulating the canvas from a seperate thread is not recommended.
+        /// </summary>
+        /// <param name="methodName">The name of the method to run in a seperate thread.</param>
+        /// <param name="args">Optional. Arguments for the specified method.</param>
         public static void RunThread(string methodName, params object[] args)
         {
             Sketch.RunThread(methodName, args);

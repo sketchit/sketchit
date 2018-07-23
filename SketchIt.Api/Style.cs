@@ -113,12 +113,14 @@ namespace SketchIt.Api
         {
             if (FillParameters != null) FillParameters.Dispose();
             FillParameters = parms;
+            FillParameters.Style = this;
         }
 
         public void SetStroke(StrokeParameters parms)
         {
             parms.PenWidth = StrokeParameters.PenWidth;
             StrokeParameters = parms;
+            StrokeParameters.Style = this;
         }
 
         public void SetTint(TintParameters parms)
