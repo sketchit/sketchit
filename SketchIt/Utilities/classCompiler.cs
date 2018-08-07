@@ -159,7 +159,7 @@ namespace SketchIt.Utilities
             return list.ToArray();
         }
 
-        public bool Compile()
+        public bool Compile(string startup = null)
         {
             Status status = IsBackgroundCompiler ? null : Status.Set("Compiling...");
 
@@ -169,8 +169,12 @@ namespace SketchIt.Utilities
 
             try
             {
+                if (string.IsNullOrEmpty(startup))
+                {
+                    startup = Properties.Resources.AppStartup;
+                }
+
                 string outputFolder = Settings.GetUserFolder() + "\\temp";
-                string startup = Properties.Resources.AppStartup;
                 SourceCode[] sourceCode = GetCodeFiles();
                 List<string> sourceFiles = new List<string>();
                 bool isStatic = Program.Parser.IsStatic();

@@ -213,93 +213,127 @@ namespace SketchIt
 
         private void MenuItemClicked(object sender, EventArgs e)
         {
-            switch (((ToolStripItem)sender).Tag.ToString())
+            try
             {
-                case "restart-preview":
-                    RestartPreview();
-                    break;
+                switch (((ToolStripItem)sender).Tag.ToString())
+                {
+                    case "restart-preview":
+                        RestartPreview();
+                        break;
 
-                case "pause-preview":
-                    PausePreview();
-                    break;
+                    case "pause-preview":
+                        PausePreview();
+                        break;
 
-                case "save-all":
-                    SaveProject();
-                    break;
+                    case "save-all":
+                        SaveProject();
+                        break;
 
-                case "add-new-source-file":
-                    AddNewSourceFile();
-                    break;
+                    case "add-new-source-file":
+                        AddNewSourceFile();
+                        break;
 
-                case "add-existing-file":
-                    AddExistingFile();
-                    break;
+                    case "add-existing-file":
+                        AddExistingFile();
+                        break;
 
-                case "open-project":
-                    OpenProject();
-                    break;
+                    case "open-project":
+                        OpenProject();
+                        break;
 
-                case "start":
-                    StartApp();
-                    break;
+                    case "start":
+                        StartApp();
+                        break;
 
-                case "stop":
-                    Stop();
-                    break;
+                    case "stop":
+                        Stop();
+                        break;
 
-                case "new-project":
-                    NewProject(true);
-                    break;
+                    case "new-project":
+                        NewProject(true);
+                        break;
 
-                case "toggle-error-list":
-                    splErrorList.Visible = pnlErrorList.Visible = ((ToolStripButton)sender).Checked;
-                    break;
+                    case "toggle-error-list":
+                        splErrorList.Visible = pnlErrorList.Visible = ((ToolStripButton)sender).Checked;
+                        break;
 
-                case "remove-from-project":
-                    if (GetActiveWindow() is BaseForm form)
-                    {
-                        form.Close();
-
-                        if (!form.Equals(GetActiveWindow()))
+                    case "remove-from-project":
+                        if (GetActiveWindow() is BaseForm form)
                         {
-                            foreach (TabButton button in tabWindows.TabButtons)
-                            {
-                                if (form.Equals(button.Tag))
-                                {
-                                    tabWindows.TabButtons.Remove(button);
-                                    break;
-                                }
+                            form.Close();
 
+                            if (!form.Equals(GetActiveWindow()))
+                            {
+                                foreach (TabButton button in tabWindows.TabButtons)
+                                {
+                                    if (form.Equals(button.Tag))
+                                    {
+                                        tabWindows.TabButtons.Remove(button);
+                                        break;
+                                    }
+
+                                }
                             }
                         }
-                    }
-                    break;
+                        break;
 
-                case "exit":
-                    this.Close();
-                    break;
+                    case "exit":
+                        this.Close();
+                        break;
 
-                case "about":
-                    new SplashScreenForm().ShowDialog();
-                    break;
+                    case "about":
+                        new SplashScreenForm().ShowDialog();
+                        break;
 
-                case "website":
-                    Process.Start("http://www.sketchit.org");
-                    break;
+                    case "website":
+                        Process.Start("http://www.sketchit.org");
+                        break;
 
-                case "help":
-                    Process.Start("sketchit.chm");
-                    break;
+                    case "help":
+                        Process.Start("sketchit.chm");
+                        break;
 
-                default:
-                    if (GetActiveWindow() != null)
-                    {
-                        GetActiveWindow().HandleCommand(((ToolStripItem)sender).Tag.ToString());
-                    }
-                    break;
+                    case "create-screen-saver":
+                        CreateScreenSaver();
+                        break;
+
+                    default:
+                        if (GetActiveWindow() != null)
+                        {
+                            GetActiveWindow().HandleCommand(((ToolStripItem)sender).Tag.ToString());
+                        }
+                        break;
+                }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "SketchIt", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                UpdateToolbarButtons();
+            }
+        }
 
-            UpdateToolbarButtons();
+        private void CreateScreenSaver()
+        {
+            using (SaveFileDialog dialog = new SaveFileDialog())
+            {
+                dialog.FileName = "SketchIt Screen Saver.scr";
+                dialog.Filter = "Screen Saver|*.scr";
+
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    if (Compiler.Compile(Properties.Resources.AppScreenSaver))
+                    {
+                        File.Copy(Compiler.Output.Location, dialog.FileName, true);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Unable to compile the sketch. Please check the error list.", "SketchIt", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
         }
 
         private void RestartPreview()
@@ -373,6 +407,18 @@ namespace SketchIt
             _updateTimer = new System.Timers.Timer(100);
             _updateTimer.Elapsed += UpdateTimerElapsed;
             _updateTimer.Start();
+
+            string latestVersion = Program.IsUpdateAvailable();
+            mnuInfo.Visible = !string.IsNullOrEmpty(latestVersion);
+            if (!string.IsNullOrEmpty(latestVersion))
+            {
+                if (MessageBox.Show(string.Format("An update is available (version {0}). Would you like to visit the website to download the latest version?", latestVersion), "SketchIt Update", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                {
+                    Process.Start("http://www.sketchit.org");
+                }
+            }
+
+            Settings.User.EnableFileWatcher();
         }
 
         private void UpdateTimerElapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -584,7 +630,7 @@ namespace SketchIt
                 _previewTimer.Start();
             }
 
-            Program.Parser.Parse();
+            //Program.Parser.Parse();
         }
 
         private void BuildPreview()
@@ -603,6 +649,7 @@ namespace SketchIt
         private void PreviewTimerElapsed(object sender, EventArgs e)
         {
             _previewTimer.Stop();
+            Program.Parser.Parse();
             BuildPreview();
         }
 
@@ -655,37 +702,36 @@ namespace SketchIt
 
         private void StartApp(int retries = 0)
         {
+            Status status = retries == 0 ? Status.Set("Preparing to launch sketch...") : null;
+
             try
             {
-                using (Status status = Status.Set("Preparing to launch sketch..."))
+                CloseLivePreview();
+                Stop();
+
+                if (Compiler.Compile())
                 {
-                    CloseLivePreview();
-                    Stop();
+                    _process = Compiler.LaunchOutput();
+                    _process.EnableRaisingEvents = true;
+                    _process.Exited += ProcessExited;
+                }
+                else
+                {
+                    //if (retries < 3)
+                    //{
+                    //    StartApp(retries + 1);
+                    //    return;
+                    //}
 
-                    if (Compiler.Compile())
+                    if (Compiler.CompilerErrors != null && Compiler.CompilerErrors.Count > 0)
                     {
-                        _process = Compiler.LaunchOutput();
-                        _process.EnableRaisingEvents = true;
-                        _process.Exited += ProcessExited;
+                        //MessageBox.Show(Compiler.CompilerErrors[0].ErrorText, "Compiler Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        throw new Exception(Compiler.CompilerErrors[0].ErrorText);
                     }
-                    else
+                    else if (Compiler.Exception != null)
                     {
-                        //if (retries < 3)
-                        //{
-                        //    StartApp(retries + 1);
-                        //    return;
-                        //}
-
-                        if (Compiler.CompilerErrors != null && Compiler.CompilerErrors.Count > 0)
-                        {
-                            //MessageBox.Show(Compiler.CompilerErrors[0].ErrorText, "Compiler Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            throw new Exception(Compiler.CompilerErrors[0].ErrorText);
-                        }
-                        else if (Compiler.Exception != null)
-                        {
-                            //MessageBox.Show(Compiler.Exception.Message, "Compiler Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            throw Compiler.Exception;
-                        }
+                        //MessageBox.Show(Compiler.Exception.Message, "Compiler Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        throw Compiler.Exception;
                     }
                 }
             }
@@ -695,12 +741,25 @@ namespace SketchIt
                 {
                     StartApp(retries + 1);
                 }
+                else
+                {
+                    if (status != null)
+                    {
+                        status.Dispose();
+                        status = null;
+                    }
 
-                MessageBox.Show(ex.Message, "Launch App", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.Message, "Launch App", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             finally
             {
                 UpdateToolbarButtons();
+            }
+
+            if (status != null)
+            {
+                status.Dispose();
             }
         }
 

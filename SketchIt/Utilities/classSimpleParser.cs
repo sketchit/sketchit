@@ -139,15 +139,22 @@ namespace SketchIt.Utilities
 
         public SyntaxNode GetNode(int position)
         {
-            if (SyntaxTree != null)
+            try
             {
-                if (SyntaxTree.Length >= position)
+                if (SyntaxTree != null)
                 {
-                    return SyntaxTree.GetCompilationUnitRoot().FindNode(new TextSpan(position, 1));
+                    if (SyntaxTree.Length >= position)
+                    {
+                        return SyntaxTree.GetCompilationUnitRoot().FindNode(new TextSpan(position, 1));
+                    }
                 }
-            }
 
-            return null;
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public ImmutableArray<ISymbol> GetSymbols(int position)
@@ -259,43 +266,49 @@ namespace SketchIt.Utilities
 
         private void DoParse(object input)
         {
-            DateTime startTime = DateTime.Now;
-            CSharpParseOptions options = new CSharpParseOptions(LanguageVersion.Default, DocumentationMode.None, SourceCodeKind.Script);
-
-            SyntaxTree = CSharpSyntaxTree.ParseText(input.ToString(), options);
-            _compilation = CSharpCompilation.Create("Sketch", new SyntaxTree[] { SyntaxTree });
-            _semanticModel = _compilation.GetSemanticModel(SyntaxTree, true);
-
-            ParsedTypes = "";
-            ParsedKeywords = "";
-
-            foreach (SyntaxNode node in SyntaxTree.GetCompilationUnitRoot().DescendantNodes())
+            try
             {
-                if (node is MethodDeclarationSyntax method)
-                {
-                    ParsedKeywords += method.Identifier.ValueText + " ";
-                }
-                else if (node is FieldDeclarationSyntax field)
-                {
-                    //ParsedKeywords += field.Declaration.Variables[0].Identifier.ValueText + " ";
-                }
-                else if (node is ClassDeclarationSyntax cls)
-                {
-                    ParsedTypes += cls.Identifier.ValueText + " ";
-                }
-                else
-                {
-                    node.ToString();
-                }
-            }
+                DateTime startTime = DateTime.Now;
+                CSharpParseOptions options = new CSharpParseOptions(LanguageVersion.Default, DocumentationMode.None, SourceCodeKind.Script);
 
-            for (int i = 0; i < Application.OpenForms.Count; i++)
+                SyntaxTree = CSharpSyntaxTree.ParseText(input.ToString(), options);
+                _compilation = CSharpCompilation.Create("Sketch", new SyntaxTree[] { SyntaxTree });
+                _semanticModel = _compilation.GetSemanticModel(SyntaxTree, true);
+
+                ParsedTypes = "";
+                ParsedKeywords = "";
+
+                foreach (SyntaxNode node in SyntaxTree.GetCompilationUnitRoot().DescendantNodes())
+                {
+                    if (node is MethodDeclarationSyntax method)
+                    {
+                        ParsedKeywords += method.Identifier.ValueText + " ";
+                    }
+                    else if (node is FieldDeclarationSyntax field)
+                    {
+                        //ParsedKeywords += field.Declaration.Variables[0].Identifier.ValueText + " ";
+                    }
+                    else if (node is ClassDeclarationSyntax cls)
+                    {
+                        ParsedTypes += cls.Identifier.ValueText + " ";
+                    }
+                    else
+                    {
+                        node.ToString();
+                    }
+                }
+
+                for (int i = 0; i < Application.OpenForms.Count; i++)
+                {
+                    if (!(Application.OpenForms[i] is BaseForm form) || form.Type != WindowType.SourceFile) continue;
+                    form.Invoke(new MethodInvoker(((EditorForm)form).UpdateEditor));
+                }
+
+                ParseTime = DateTime.Now.Subtract(startTime);
+            }
+            catch
             {
-                if (!(Application.OpenForms[i] is BaseForm form) || form.Type != WindowType.SourceFile) continue;
-                form.Invoke(new MethodInvoker(((EditorForm)form).UpdateEditor));
             }
-
-            ParseTime = DateTime.Now.Subtract(startTime);
         }
 
         public string[] GetMembers(string typeName)

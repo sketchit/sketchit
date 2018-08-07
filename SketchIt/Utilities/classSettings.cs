@@ -34,19 +34,24 @@ namespace SketchIt.Utilities
         {
             string folder = GetUserFolder();
 
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-
             if (_settingsFileWatcher == null)
             {
+                //string folder = GetUserFolder();
                 _settingsFileWatcher = new FileSystemWatcher(folder, "settings.json");
                 _settingsFileWatcher.Changed += SettingsFileChanged;
                 _settingsFileWatcher.EnableRaisingEvents = true;
             }
 
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
             return folder + "\\settings.json";
+        }
+
+        public void EnableFileWatcher()
+        {
         }
 
         private void SettingsFileChanged(object sender, FileSystemEventArgs e)
@@ -65,13 +70,17 @@ namespace SketchIt.Utilities
             {
                 if (locker.IsLocked)
                 {
-                    foreach (Form form in Application.OpenForms)
+                    int i = 0;
+
+                    while (i < Application.OpenForms.Count)
                     {
-                        if (form is BaseForm)
+                        if (Application.OpenForms[i] is BaseForm form)
                         {
                             MethodInvoker mi = new MethodInvoker(((BaseForm)form).UpdateAppearance);
                             form.Invoke(mi);
                         }
+
+                        i++;
                     }
                 }
             }

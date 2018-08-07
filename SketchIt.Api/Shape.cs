@@ -65,5 +65,23 @@ namespace SketchIt.Api
         {
             _vertices.RemoveAt(index);
         }
+
+        public Rectangle GetBounds()
+        {
+            float minX = 0;
+            float minY = 0;
+            float maxX = 0;
+            float maxY = 0;
+
+            foreach (Vertex v in _vertices)
+            {
+                if (v.X < minX) minX = v.X;
+                if (v.Y < minY) minY = v.Y;
+                if (v.X > maxX) maxX = v.X;
+                if (v.Y > maxY) maxY = v.Y;
+            }
+
+            return new Rectangle(minX, minY, maxX - minX, maxY - minY);
+        }
     }
 }

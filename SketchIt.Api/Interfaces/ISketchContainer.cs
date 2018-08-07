@@ -39,6 +39,11 @@
         int MouseY { get; }
 
         /// <summary>
+        /// Should return the pressed Mouse Buttons.
+        /// </summary>
+        int MouseButton { get; }
+
+        /// <summary>
         /// Should return true if a mouse button is currently pressed.
         /// </summary>
         bool IsMousePressed { get; }

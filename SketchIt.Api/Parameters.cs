@@ -8,12 +8,30 @@ namespace SketchIt.Api
 {
     public class ShapeParameters
     {
-        public ShapeParameters(Shape shape)
+        public ShapeParameters(Shape shape, float x, float y)
         {
             Shape = shape;
+            X = x;
+            Y = y;
         }
 
-        public Shape Shape { get; private set; }
+        public float X
+        {
+            get;
+            set;
+        }
+
+        public float Y
+        {
+            get;
+            set;
+        }
+
+        public Shape Shape
+        {
+            get;
+            set;
+        }
     }
 
     public class ColorModeParameters

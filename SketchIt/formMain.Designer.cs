@@ -30,6 +30,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.mnsMain = new System.Windows.Forms.MenuStrip();
+            this.mnuInfo = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuDownloadLatest = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuFile = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuNewSketch = new System.Windows.Forms.ToolStripMenuItem();
             this.newSourceFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -40,6 +42,13 @@
             this.sketchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuRun = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuStop = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.mnuSetScreenSaver = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuHelp = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuWebsite = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.mnuAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.tabWindows = new SketchIt.Controls.TabButtonsControl();
             this.tlsMain = new System.Windows.Forms.ToolStrip();
             this.btnNewProject = new System.Windows.Forms.ToolStripButton();
@@ -72,11 +81,6 @@
             this.sspMain = new System.Windows.Forms.StatusStrip();
             this.tslStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.tslParseTime = new System.Windows.Forms.ToolStripStatusLabel();
-            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuHelp = new System.Windows.Forms.ToolStripMenuItem();
-            this.mnuWebsite = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-            this.mnuAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.mnsMain.SuspendLayout();
             this.tlsMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pnlPreviewPane)).BeginInit();
@@ -92,6 +96,7 @@
             // mnsMain
             // 
             this.mnsMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuInfo,
             this.mnuFile,
             this.sketchToolStripMenuItem,
             this.helpToolStripMenuItem});
@@ -100,6 +105,27 @@
             this.mnsMain.Size = new System.Drawing.Size(994, 24);
             this.mnsMain.TabIndex = 1;
             this.mnsMain.Text = "menuStrip1";
+            // 
+            // mnuInfo
+            // 
+            this.mnuInfo.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.mnuInfo.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuDownloadLatest});
+            this.mnuInfo.Image = global::SketchIt.Properties.Resources.Info;
+            this.mnuInfo.Name = "mnuInfo";
+            this.mnuInfo.Size = new System.Drawing.Size(28, 20);
+            this.mnuInfo.Tag = "info";
+            this.mnuInfo.Text = "Update Available";
+            this.mnuInfo.ToolTipText = "An update is available";
+            this.mnuInfo.Click += new System.EventHandler(this.MenuItemClicked);
+            // 
+            // mnuDownloadLatest
+            // 
+            this.mnuDownloadLatest.Name = "mnuDownloadLatest";
+            this.mnuDownloadLatest.Size = new System.Drawing.Size(209, 22);
+            this.mnuDownloadLatest.Tag = "website";
+            this.mnuDownloadLatest.Text = "Download latest version...";
+            this.mnuDownloadLatest.Click += new System.EventHandler(this.MenuItemClicked);
             // 
             // mnuFile
             // 
@@ -162,7 +188,9 @@
             // 
             this.sketchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuRun,
-            this.mnuStop});
+            this.mnuStop,
+            this.toolStripSeparator6,
+            this.mnuSetScreenSaver});
             this.sketchToolStripMenuItem.Name = "sketchToolStripMenuItem";
             this.sketchToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
             this.sketchToolStripMenuItem.Text = "&Sketch";
@@ -171,7 +199,7 @@
             // 
             this.mnuRun.Name = "mnuRun";
             this.mnuRun.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.mnuRun.Size = new System.Drawing.Size(114, 22);
+            this.mnuRun.Size = new System.Drawing.Size(184, 22);
             this.mnuRun.Tag = "start";
             this.mnuRun.Text = "&Run";
             this.mnuRun.Click += new System.EventHandler(this.MenuItemClicked);
@@ -180,10 +208,63 @@
             // 
             this.mnuStop.Enabled = false;
             this.mnuStop.Name = "mnuStop";
-            this.mnuStop.Size = new System.Drawing.Size(114, 22);
+            this.mnuStop.Size = new System.Drawing.Size(184, 22);
             this.mnuStop.Tag = "stop";
             this.mnuStop.Text = "Stop";
             this.mnuStop.Click += new System.EventHandler(this.MenuItemClicked);
+            // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(181, 6);
+            // 
+            // mnuSetScreenSaver
+            // 
+            this.mnuSetScreenSaver.Name = "mnuSetScreenSaver";
+            this.mnuSetScreenSaver.Size = new System.Drawing.Size(184, 22);
+            this.mnuSetScreenSaver.Tag = "create-screen-saver";
+            this.mnuSetScreenSaver.Text = "Create screen saver...";
+            this.mnuSetScreenSaver.Click += new System.EventHandler(this.MenuItemClicked);
+            // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuHelp,
+            this.mnuWebsite,
+            this.toolStripSeparator5,
+            this.mnuAbout});
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Text = "Help";
+            // 
+            // mnuHelp
+            // 
+            this.mnuHelp.Name = "mnuHelp";
+            this.mnuHelp.Size = new System.Drawing.Size(152, 22);
+            this.mnuHelp.Tag = "help";
+            this.mnuHelp.Text = "View Help";
+            this.mnuHelp.Click += new System.EventHandler(this.MenuItemClicked);
+            // 
+            // mnuWebsite
+            // 
+            this.mnuWebsite.Name = "mnuWebsite";
+            this.mnuWebsite.Size = new System.Drawing.Size(152, 22);
+            this.mnuWebsite.Tag = "website";
+            this.mnuWebsite.Text = "Visit website...";
+            this.mnuWebsite.Click += new System.EventHandler(this.MenuItemClicked);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(149, 6);
+            // 
+            // mnuAbout
+            // 
+            this.mnuAbout.Name = "mnuAbout";
+            this.mnuAbout.Size = new System.Drawing.Size(152, 22);
+            this.mnuAbout.Tag = "about";
+            this.mnuAbout.Text = "About SketchIt";
+            this.mnuAbout.Click += new System.EventHandler(this.MenuItemClicked);
             // 
             // tabWindows
             // 
@@ -533,46 +614,6 @@
             this.tslParseTime.Name = "tslParseTime";
             this.tslParseTime.Size = new System.Drawing.Size(0, 18);
             // 
-            // helpToolStripMenuItem
-            // 
-            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuHelp,
-            this.mnuWebsite,
-            this.toolStripSeparator5,
-            this.mnuAbout});
-            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.helpToolStripMenuItem.Text = "Help";
-            // 
-            // mnuHelp
-            // 
-            this.mnuHelp.Name = "mnuHelp";
-            this.mnuHelp.Size = new System.Drawing.Size(180, 22);
-            this.mnuHelp.Tag = "help";
-            this.mnuHelp.Text = "View Help";
-            this.mnuHelp.Click += new System.EventHandler(this.MenuItemClicked);
-            // 
-            // mnuWebsite
-            // 
-            this.mnuWebsite.Name = "mnuWebsite";
-            this.mnuWebsite.Size = new System.Drawing.Size(180, 22);
-            this.mnuWebsite.Tag = "website";
-            this.mnuWebsite.Text = "Visit website...";
-            this.mnuWebsite.Click += new System.EventHandler(this.MenuItemClicked);
-            // 
-            // toolStripSeparator5
-            // 
-            this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(177, 6);
-            // 
-            // mnuAbout
-            // 
-            this.mnuAbout.Name = "mnuAbout";
-            this.mnuAbout.Size = new System.Drawing.Size(180, 22);
-            this.mnuAbout.Tag = "about";
-            this.mnuAbout.Text = "About SketchIt";
-            this.mnuAbout.Click += new System.EventHandler(this.MenuItemClicked);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -666,5 +707,9 @@
         private System.Windows.Forms.ToolStripMenuItem mnuWebsite;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem mnuAbout;
+        private System.Windows.Forms.ToolStripMenuItem mnuInfo;
+        private System.Windows.Forms.ToolStripMenuItem mnuDownloadLatest;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripMenuItem mnuSetScreenSaver;
     }
 }

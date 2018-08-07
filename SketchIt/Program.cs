@@ -3,6 +3,7 @@ using SketchIt.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -124,6 +125,33 @@ namespace SketchIt
             }
 
             return null;
+        }
+
+        public static string IsUpdateAvailable()
+        {
+            //a basic implementation to check for a new version. a proper automatic updater
+            //must still be implemented.
+            try
+            {
+                WebClient web = new WebClient();
+                byte[] data = web.DownloadData("http://www.sketchit.org/downloads/latest.version.txt");
+                string[] latest = System.Text.Encoding.Default.GetString(data).Split(new char[] { '.' });
+                string[] current = Application.ProductVersion.Split(new char[] { '.' });
+
+                for (int i = 0; i < latest.Length; i++)
+                {
+                    if (Convert.ToInt32(latest[i]) > Convert.ToInt32(current[i]))
+                    {
+                        return string.Join(".", latest);
+                    }
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
     }
 }

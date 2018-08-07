@@ -197,7 +197,7 @@ namespace SketchIt.Api.Renderers
         public virtual void EndShape(EndShapeMode mode)
         {
             _currentShape.End(mode);
-            DrawShape(new ShapeParameters(_currentShape));
+            DrawShape(new ShapeParameters(_currentShape, 0, 0));
 
             _shapeStack.Pop();
 

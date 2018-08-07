@@ -48,11 +48,6 @@ namespace SketchIt.Api.Static
             return Map((float)_random.NextGaussian(), -3, 3, 0, 1);
         }
 
-        public static int Floor(float value)
-        {
-            return (int)Math.Floor(value);
-        }
-
         public static float GetDistance(float x1, float y1, float x2, float y2)
         {
             float x = x2 - x1;
@@ -117,9 +112,29 @@ namespace SketchIt.Api.Static
             return (float)Math.Ceiling(number);
         }
 
-        public static float Floot(float number)
+        public static float Floor(float number)
         {
             return (float)Math.Floor(number);
+        }
+
+        public static int Int(object value)
+        {
+            return Convert.ToInt32(value);
+        }
+
+        public static float Float(object value)
+        {
+            return Convert.ToSingle(value);
+        }
+
+        public static double Double(object value)
+        {
+            return Convert.ToDouble(value);
+        }
+
+        public static string String(object value)
+        {
+            return value.ToString();
         }
 
         public static Color ColorFromAhsb_(int a, float h, float s, float b)

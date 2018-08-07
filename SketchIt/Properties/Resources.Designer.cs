@@ -95,6 +95,33 @@ namespace SketchIt.Properties {
         ///        static extern bool AllocConsole();
         ///
         ///        [STAThread]
+        ///        static void Main(string[] args) 
+        ///	    { 
+        ///            bool run = true;
+        ///
+        ///            AppDomain.CurrentDomain.AssemblyResolve + [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string AppScreenSaver {
+            get {
+                return ResourceManager.GetString("AppScreenSaver", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to using System;
+        ///using System.Reflection;
+        ///using System.IO;
+        ///using System.Windows.Forms;
+        ///using System.Drawing;
+        ///using System.Runtime.InteropServices;
+        ///
+        ///namespace SketchIt {
+        ///    public class Program {
+        ///        [DllImport(&quot;kernel32.dll&quot;, SetLastError = true)]
+        ///        [return: MarshalAs(UnmanagedType.Bool)]
+        ///        static extern bool AllocConsole();
+        ///
+        ///        [STAThread]
         ///        static void Main() { 
         ///	        AllocConsole();
         ///
@@ -146,6 +173,16 @@ namespace SketchIt.Properties {
         internal static System.Drawing.Bitmap Error {
             get {
                 object obj = ResourceManager.GetObject("Error", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Info {
+            get {
+                object obj = ResourceManager.GetObject("Info", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

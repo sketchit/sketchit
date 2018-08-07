@@ -12,7 +12,7 @@ namespace SketchIt.Video
         }
     }
 
-    public partial class Capture
+    public partial class Capture : IDisposable
     {
         private Applet _applet;
         private Sketch _sketch;

@@ -103,14 +103,17 @@ namespace SketchIt
                 else if (control is MenuStrip menuStrip)
                 {
                     menuStrip.Renderer = new CustomToolStripRenderer();
+                    menuStrip.Font = this.Font;
                 }
                 else if (control is ToolStrip toolStrip)
                 {
                     toolStrip.Renderer = new CustomToolStripRenderer();
+                    toolStrip.Font = this.Font;
                 }
                 else if (control is StatusStrip statusStrip)
                 {
                     statusStrip.Renderer = new CustomToolStripRenderer();
+                    statusStrip.Font = this.Font;
                 }
                 else if (control is MdiClient && this.IsMdiContainer)
                 {

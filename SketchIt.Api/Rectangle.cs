@@ -62,6 +62,26 @@
             }
         }
 
+        public float Top
+        {
+            get => _x;
+        }
+
+        public float Left
+        {
+            get => _y;
+        }
+
+        public float Right
+        {
+            get => _x + _width;
+        }
+
+        public float Bottom
+        {
+            get => _y + _height;
+        }
+
         private void ResetCache()
         {
             _systemRectangle = System.Drawing.Rectangle.Empty;

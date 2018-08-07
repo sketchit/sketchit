@@ -254,6 +254,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Info_20px.png" />
     <Content Include="SketchIt.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

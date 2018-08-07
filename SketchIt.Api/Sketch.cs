@@ -151,7 +151,7 @@ namespace SketchIt.Api
                     InvokeSetup();
                 }
 
-                if (_methodDraw != null)
+                if (_methodDraw != null && !_stopped)
                 {
                     Loop();
                 }
@@ -292,14 +292,20 @@ namespace SketchIt.Api
 
         private void DrawTimerElapsed(object sender, ElapsedEventArgs e)
         {
+            HandleDraw();
+        }
+
+        private void HandleDraw(bool redraw = false)
+        {
             using (ThreadLocker locker = ThreadLocker.Lock())
             {
                 if (!locker.IsLocked) return;
                 if (IsDrawing) return;
                 if (Container == null) return;
+                if (_stopped) return;
 
                 //if (DateTime.Now.Subtract(_lastDrawnTime).TotalMilliseconds >= _drawInterval)
-                if (FrameRate <= _frameRate)
+                if (FrameRate <= _frameRate || redraw)
                 {
                     switch (OutputLayer.RendererType)
                     {
@@ -316,12 +322,12 @@ namespace SketchIt.Api
 
                             for (int i = 0; i < _updateInterval - 1; i++)
                             {
-                                if (!IsLooping || _stopped)
+                                if (!redraw && (!IsLooping || _stopped))
                                 {
                                     break;
                                 }
 
-                                InvokeDraw();
+                                InvokeDraw(redraw);
                             }
 
                             //if (_multiLayer)
@@ -329,9 +335,9 @@ namespace SketchIt.Api
                             //    OutputLayer.IRenderer.Clear();
                             //}
 
-                            if (IsLooping && !_stopped)
+                            if (redraw || (IsLooping && !_stopped))
                             {
-                                InvokeDraw();
+                                InvokeDraw(redraw);
 
                                 if (_multiLayer)
                                 {
@@ -373,9 +379,9 @@ namespace SketchIt.Api
             IsDrawing = false;
         }
 
-        private void InvokeDraw()
+        private void InvokeDraw(bool redraw = false)
         {
-            if (_stopped) return;
+            if (_stopped && !redraw) return;
 
             if (_methodDraw != null)
             {
@@ -881,6 +887,11 @@ namespace SketchIt.Api
                 Print(valueList.ToArray());
             }
             //).Invoke();
+        }
+
+        public void Redraw()
+        {
+            HandleDraw(true);
         }
 
         public void RunThread(string methodName, params object[] args)

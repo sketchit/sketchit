@@ -16,6 +16,7 @@
 
         public const int LEFT = 1;
         public const int RIGHT = 2;
+        public const int MIDDLE = 4;
 
         public const int TOP = 1;
         public const int BOTTOM = 2;

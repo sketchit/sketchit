@@ -363,6 +363,9 @@ namespace SketchIt.Api.Renderers
             using (DeviceContextHandler dch = GetDeviceContextHandler())
             using (GraphicsPath path = GetShapePath(parms.Shape))
             {
+                PushMatrix();
+                Translate(parms.X, parms.Y);
+
                 if (!Style.FillParameters.Disabled)
                 {
                     dch.DrawingSurface.FillPath(Style.FillParameters.ToBrush(), path);
@@ -385,6 +388,8 @@ namespace SketchIt.Api.Renderers
                         dch.DrawingSurface.DrawImage(texture.Bitmap, new PointF());
                     }
                 }
+
+                PopMatrix();
             }
         }
 

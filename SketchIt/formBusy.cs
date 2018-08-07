@@ -83,7 +83,7 @@ namespace SketchIt
                     }
                     else
                     {
-                        if (elapsedTime.TotalSeconds >= 6 /*&& seconds < 15*/)
+                        if (elapsedTime.TotalSeconds >= 2 /*&& seconds < 15*/)
                         {
                             if (elapsedTime.Hours >= 1)
                                 lblElapsedTime.Text = string.Format("{4:0} hour{5}, {0:0} minute{2}, {1:0} second{3}", elapsedTime.Minutes, elapsedTime.Seconds, elapsedTime.Minutes == 1 ? "" : "s", elapsedTime.Seconds == 1 ? "" : "s", elapsedTime.Hours, elapsedTime.Hours == 1 ? "" : "s");

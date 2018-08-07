@@ -124,6 +124,113 @@
   <data name="AddFile" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Add File_20px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="AppScreenSaver" xml:space="preserve">
+    <value>using System;
+using System.Reflection;
+using System.IO;
+using System.Windows.Forms;
+using System.Drawing;
+using System.Runtime.InteropServices;
+
+namespace SketchIt {
+    public class Program {
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool AllocConsole();
+
+        [STAThread]
+        static void Main(string[] args) 
+	    { 
+            bool run = true;
+
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            
+            if (args != null &amp;&amp; args.Length &gt; 0)
+            {
+                switch (args[0].ToLower().Trim().Substring(0, 2))
+                {
+                    case "/s": //show
+                        break;
+
+                    case "/p": //preview
+                        run = false;
+                        break;
+
+                    case "/c": //configure
+                        MessageBox.Show("This screensaver does not have any configuration options.", "SketchIt Screen Saver", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        run = false;
+                        break;
+                }
+            }
+
+            if (run)
+            {
+                Application.Run(CreateForm());
+            }
+        }
+
+        private static Form CreateForm()
+        {
+            Form f = new Form();
+            SketchIt.Windows.SketchContainer container = new SketchIt.Windows.SketchContainer();
+
+            f.KeyPreview = true;
+            f.Icon = container.Icon;
+            f.Controls.Add(container);
+            f.AutoSize = true;
+            f.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            f.MaximizeBox = false;
+            f.FormBorderStyle = FormBorderStyle.FixedSingle;
+            f.Closed += FormClosed;
+            f.KeyDown += KeyDown;
+            container.Location = new Point(0, 0);
+            container.Margin = new Padding(0, 0, 0, 0);
+            container.BackColor = Color.FromArgb(100, 100, 100);
+
+            App app = new App();
+            SketchIt.Api.Sketch sketch = new SketchIt.Api.Sketch();
+            sketch.Exited += delegate(object sender, EventArgs e)
+            {
+                f.Close();
+            };
+            SketchIt.Windows.Application.Set(sketch);
+            sketch.Start(app, container);
+
+            return f;
+        }
+
+        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            try
+            {
+                string assemblyName = args.Name.Split(new char[] { ',' })[0] + ".dll";
+
+                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(assemblyName))
+                {
+                    byte[] assembly = new byte[stream.Length];
+                    stream.Read(assembly, 0, assembly.Length);
+                    return Assembly.Load(assembly);
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        private static void KeyDown(object sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.Escape) {
+                ((Form)sender).Close();
+            }
+        }
+
+        private static void FormClosed(object sender, EventArgs e) {
+        }
+    }
+}</value>
+  </data>
   <data name="AppStartup" xml:space="preserve">
     <value>using System;
 using System.Reflection;
@@ -234,6 +341,9 @@ using static SketchIt.Api.Static.Constants;
   </data>
   <data name="Error" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\High Priority_20px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Info" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Info_20px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="OpenFolder" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Open_20px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

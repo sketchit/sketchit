@@ -85,6 +85,20 @@ namespace SketchIt.Windows
             }
         }
 
+        public int MouseButton
+        {
+            get
+            {
+                int button = 0;
+
+                if ((MouseButtons & MouseButtons.Left) != 0) button |= SketchIt.Api.Static.Constants.LEFT;
+                if ((MouseButtons & MouseButtons.Right) != 0) button |= SketchIt.Api.Static.Constants.RIGHT;
+                if ((MouseButtons & MouseButtons.Middle) != 0) button |= SketchIt.Api.Static.Constants.MIDDLE;
+
+                return button;
+            }
+        }
+
         public bool IsMousePressed
         {
             get { return MouseButtons != MouseButtons.None; }
@@ -168,13 +182,20 @@ namespace SketchIt.Windows
 
         private object InvokeMethod(string method, params object[] args)
         {
-            if (InvokeRequired)
+            try
             {
-                return Invoke(new GenericInvocationHandler(GenericMethodHandler), new object[] { method, args });
+                if (InvokeRequired)
+                {
+                    return Invoke(new GenericInvocationHandler(GenericMethodHandler), new object[] { method, args });
+                }
+                else
+                {
+                    return new GenericInvocationHandler(GenericMethodHandler).DynamicInvoke(new object[] { method, args });
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return new GenericInvocationHandler(GenericMethodHandler).DynamicInvoke(new object[] { method, args });
+                throw ex;
             }
         }
 

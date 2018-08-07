@@ -240,6 +240,12 @@ namespace SketchIt.Windows
         public static void DrawRectangle(float x, float y, float width, float height) { CurrentLayer.Renderer.DrawRectangle(new RectangleParameters(x, y, width, height)); }
 
         /// <summary>
+        /// Draws a rectangle to the canvas.
+        /// </summary>
+        /// <param name="rectangle">The <see cref="Rectangle"/> to be drawn.</param>
+        public static void DrawRectangle(Rectangle rectangle) { DrawRectangle(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height); }
+
+        /// <summary>
         /// Draws a point using the current stroke weight to the canvas.
         /// </summary>
         /// <param name="x">The x-coordinate of the point.</param>
@@ -250,7 +256,9 @@ namespace SketchIt.Windows
         /// Draws a shape to the canvas.
         /// </summary>
         /// <param name="shape">The shape to be drawn. See <see cref="Shape"/> for more information.</param>
-        public static void DrawShape(Shape shape) { CurrentLayer.Renderer.DrawShape(new ShapeParameters(shape)); }
+        /// <param name="x">The x-coordinate of the shape's origin.</param>
+        /// <param name="y">The y-coordinate of the shape's origin.</param>
+        public static void DrawShape(Shape shape, float x, float y) { CurrentLayer.Renderer.DrawShape(new ShapeParameters(shape, x, y)); }
 
         /// <summary>
         /// Draws a line to the canvas.
@@ -303,6 +311,7 @@ namespace SketchIt.Windows
         public static void SetFont(string name, float size, bool bold, bool italic) { Style.SetFont(new FontParameters(name, size, bold, italic)); }
 
         public static void Clear() { CurrentLayer.Renderer.Clear(); }
+        public static void Redraw() { Sketch.Redraw(); }
 
         public static void DrawBackground(IImage image) { CurrentLayer.Renderer.DrawBackground(new BackgroundParameters(image)); }
 
@@ -407,6 +416,8 @@ namespace SketchIt.Windows
         /// Returns true if a mouse buttons is pressed.
         /// </summary>
         public static bool IsMousePressed { get { return Sketch.Container.IsMousePressed; } }
+
+        public static int MouseButton { get { return Sketch.Container.MouseButton; } }
 
         /// <summary>
         /// Returns the version number of the SketchIt API.
