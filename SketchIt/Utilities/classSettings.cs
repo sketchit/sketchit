@@ -34,17 +34,17 @@ namespace SketchIt.Utilities
         {
             string folder = GetUserFolder();
 
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+
             if (_settingsFileWatcher == null)
             {
                 //string folder = GetUserFolder();
                 _settingsFileWatcher = new FileSystemWatcher(folder, "settings.json");
                 _settingsFileWatcher.Changed += SettingsFileChanged;
                 _settingsFileWatcher.EnableRaisingEvents = true;
-            }
-
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
             }
 
             return folder + "\\settings.json";
