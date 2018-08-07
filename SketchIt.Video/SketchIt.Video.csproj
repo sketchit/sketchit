@@ -34,7 +34,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <DocumentationFile>..\SketchIt\bin\Release\libraries\Video\SketchIt.Video.xml</DocumentationFile>
+    <DocumentationFile>..\..\..\SketchIt\libraries\Video\SketchIt.Video.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Emgu.CV.UI, Version=3.4.1.2976, Culture=neutral, processorArchitecture=MSIL">
