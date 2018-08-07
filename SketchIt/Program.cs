@@ -144,6 +144,10 @@ namespace SketchIt
                     {
                         return string.Join(".", latest);
                     }
+                    else if (Convert.ToInt32(latest[i]) < Convert.ToInt32(current[i]))
+                    {
+                        return null;
+                    }
                 }
 
                 return null;
