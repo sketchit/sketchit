@@ -64,12 +64,12 @@
 
         public float Top
         {
-            get => _x;
+            get => _y;
         }
 
         public float Left
         {
-            get => _y;
+            get => _x;
         }
 
         public float Right
