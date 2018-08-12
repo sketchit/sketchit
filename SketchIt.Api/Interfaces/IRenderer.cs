@@ -26,13 +26,17 @@ namespace SketchIt.Api.Interfaces
         void DrawShape(ShapeParameters parms);
         void DrawBezier(BezierParameters parms);
         void DrawCurve(CurveParameters parms);
+        void DrawBox(BoxParameters parms);
 
         void PushMatrix();
         void PopMatrix();
         void ResetMatrix();
-        void Scale(float x, float y);
-        void Translate(float x, float y);
+        void Scale(float x, float y, float z);
+        void Translate(float x, float y, float z);
         void Rotate(float angle);
+        void RotateX(float angle);
+        void RotateY(float angle);
+        void RotateZ(float angle);
         void SetSize(float width, float height);
 
         void BeginDraw();
@@ -42,6 +46,9 @@ namespace SketchIt.Api.Interfaces
         void EndShape(EndShapeMode mode);
         void Vertex(float x, float y, float z, float u, float v);
         void Texture(IImage image);
+
+        void SetPerspective();
+        void SetOrtho();
 
         Canvas Canvas { get; }
     }

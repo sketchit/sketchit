@@ -1,4 +1,6 @@
-﻿namespace SketchIt.Api.Interfaces
+﻿using System;
+
+namespace SketchIt.Api.Interfaces
 {
     /// <summary>
     /// The ISketchContainer interface would normally be implemented by a class where painting of the canvas
@@ -62,5 +64,7 @@
         /// Called by the sketch after the renderer is changed.
         /// </summary>
         void RendererChanged(RendererType rendererType);
+
+        IntPtr WindowHandle { get; }
     }
 }

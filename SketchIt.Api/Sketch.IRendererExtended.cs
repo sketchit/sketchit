@@ -123,5 +123,20 @@ namespace SketchIt.Api
         {
             ((IRendererExtended)Renderer).Vertex(x, y);
         }
+
+        public void Vertex(float x, float y, float z)
+        {
+            ((IRendererExtended)Renderer).Vertex(x, y, z);
+        }
+
+        public void Translate(float x, float y)
+        {
+            ((IRendererExtended)Renderer).Translate(x, y);
+        }
+
+        public void Scale(float x, float y)
+        {
+            ((IRendererExtended)Renderer).Scale(x, y);
+        }
     }
 }

@@ -30,7 +30,7 @@ namespace SketchIt.Api.Renderers
                         return filled ? BeginMode.Polygon : BeginMode.LineStrip;
 
                     case ShapeKind.Quads:
-                        return BeginMode.Quads;
+                        return filled ? BeginMode.Quads : BeginMode.QuadStrip;
 
                     case ShapeKind.QuadStrip:
                         return BeginMode.QuadStrip;
@@ -52,6 +52,13 @@ namespace SketchIt.Api.Renderers
 
         private Sketch _sketch;
         private OpenGL _openGL;
+        private float defCameraFOV;
+        private float defCameraX;
+        private float defCameraY;
+        private float defCameraZ;
+        private float defCameraNear;
+        private float defCameraFar;
+        private float defCameraAspect;
 
         public IRenderer IRenderer => this;
         public SharpGLRenderer(Canvas canvas)
@@ -68,8 +75,7 @@ namespace SketchIt.Api.Renderers
         private void InitializeOpenGL()
         {
             _openGL = new OpenGL();
-            _openGL.Create(OpenGLVersion.OpenGL2_1, RenderContextType.FBO, Canvas.Width, Canvas.Height, 32, null);
-            //_openGL.Viewport(0, 0, Canvas.Width, Canvas.Height);
+            _openGL.Create(OpenGLVersion.OpenGL2_1, RenderContextType.FBO, Canvas.Width, Canvas.Height, 32, Canvas.Sketch.Container.WindowHandle);
 
             _openGL.ShadeModel(OpenGL.GL_SMOOTH);
             _openGL.ClearColor(1.0f, 0.0f, 0.0f, 1.0f);
@@ -80,16 +86,18 @@ namespace SketchIt.Api.Renderers
 
             _openGL.Enable(OpenGL.GL_BLEND);
             _openGL.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE_MINUS_SRC_ALPHA);
-            //_openGL.BlendFunc(BlendingSourceFactor.SourceAlpha, BlendingDestinationFactor.DestinationAlpha);
             _openGL.Enable(OpenGL.GL_LINE_SMOOTH);
             _openGL.Hint(OpenGL.GL_LINE_SMOOTH_HINT, OpenGL.GL_NICEST);
 
-            _openGL.Clear(OpenGL.GL_DEPTH_BUFFER_BIT);
-            //_openGL.Ortho2D(0, Canvas.Width, Canvas.Height, 0);
-            _openGL.Viewport(0, 0, Canvas.Width, Canvas.Height);
-            _openGL.MatrixMode(MatrixMode.Projection);
-            _openGL.LoadIdentity();
-            _openGL.Ortho(-1, 1, -1, 1, -1, 1);
+            defCameraFOV = 60f;
+            defCameraX = Canvas.Width / 2f;
+            defCameraY = Canvas.Height / 2f;
+            defCameraZ = defCameraY / ((float)Math.Tan((defCameraFOV / 360f * Constants.TWO_PI) / 2f));
+            defCameraNear = defCameraZ / 10f;
+            defCameraFar = defCameraZ * 10f;
+            defCameraAspect = (float)Canvas.Width / (float)Canvas.Height;
+
+            SetPerspective();
         }
 
         private float MapX(float x)
@@ -111,7 +119,7 @@ namespace SketchIt.Api.Renderers
         private void SetStroke()
         {
             float[] rgba = Canvas.Style.StrokeParameters.Color.GetNormalizedValues();
-            _openGL.LineWidth(Canvas.Style.StrokeParameters.PenWidth);
+            _openGL.LineWidth(Canvas.Style.StrokeParameters.PenWidth * Canvas.Sketch.Zoom);
             _openGL.Color(rgba[0], rgba[1], rgba[2], rgba[3]);
         }
 
@@ -119,20 +127,12 @@ namespace SketchIt.Api.Renderers
         {
             _openGL.Begin(EnumConverter.ToBeginMode(shape.Kind, filled));
 
-            float x;
-            float y;
-
             foreach (Vertex v in shape.Vertices)
             {
-                x =  v.X / Canvas.Width * 2 - 1.0f;
-                y = 1.0f - v.Y / Canvas.Height * 2;
-
-                _openGL.Vertex(x, y, v.Z);
+                _openGL.Vertex(v.X, v.Y * -1, v.Z);
             }
 
-            x = shape.Vertices[0].X / Canvas.Width * 2 - 1.0f;
-            y = 1.0f - shape.Vertices[0].Y / Canvas.Height * 2;
-            _openGL.Vertex(x, y, shape.Vertices[0].Z);
+            //_openGL.Vertex(shape.Vertices[0].X, shape.Vertices[0].Y * -1, shape.Vertices[0].Z);
 
             _openGL.End();
         }
@@ -140,7 +140,9 @@ namespace SketchIt.Api.Renderers
         public override void BeginDraw()
         {
             _openGL.MakeCurrent();
+            ResetMatrix();
             _openGL.PushMatrix();
+            _openGL.Scale(Canvas.Sketch.Zoom, Canvas.Sketch.Zoom, Canvas.Sketch.Zoom);
         }
 
         public override void DrawBackground(BackgroundParameters parms)
@@ -150,44 +152,11 @@ namespace SketchIt.Api.Renderers
             _openGL.Clear(OpenGL.GL_COLOR_BUFFER_BIT);
         }
 
-        //public override void DrawLine(LineParameters parms)
-        //{
-        //    SetStroke();
-        //    _openGL.Begin(BeginMode.Lines);
-        //    _openGL.Vertex(parms.X1, parms.Y1);
-        //    _openGL.Vertex(parms.X2, parms.Y2);
-        //    _openGL.End();
-        //}
-
-        //public override void DrawRectangle(RectangleParameters parms)
-        //{
-        //    RectangleF rect = Canvas.Style.GetAdjustedRectangle(parms);
-
-        //    if (!Canvas.FillParameters.Disabled)
-        //    {
-        //        SetFill();
-        //        _openGL.Begin(BeginMode.Polygon);
-        //        _openGL.Vertex(rect.X, rect.Y);
-        //        _openGL.Vertex(rect.Right, rect.Y);
-        //        _openGL.Vertex(rect.Right, rect.Bottom);
-        //        _openGL.Vertex(rect.X, rect.Bottom);
-        //        _openGL.End();
-        //    }
-
-        //    if (!Canvas.StrokeParameters.Disabled)
-        //    {
-        //        SetStroke();
-        //        _openGL.Begin(BeginMode.LineLoop);
-        //        _openGL.Vertex(rect.X, rect.Y);
-        //        _openGL.Vertex(rect.Right, rect.Y);
-        //        _openGL.Vertex(rect.Right, rect.Bottom);
-        //        _openGL.Vertex(rect.X, rect.Bottom);
-        //        _openGL.End();
-        //    }
-        //}
-
         public override void DrawShape(ShapeParameters parms)
         {
+            PushMatrix();
+            Translate(parms.X, parms.Y);
+
             if (!Style.FillParameters.Disabled && parms.Shape.EndMode == EndShapeMode.Close)
             {
                 SetFill();
@@ -199,6 +168,8 @@ namespace SketchIt.Api.Renderers
                 SetStroke();
                 AddShapeVertices(parms.Shape, false);
             }
+
+            PopMatrix();
         }
 
         public override void EndDraw()
@@ -207,9 +178,10 @@ namespace SketchIt.Api.Renderers
             {
                 IntPtr dc = Canvas.Sketch.Graphics.GetHdc();
                 _openGL.Blit(dc);
-                _openGL.PopMatrix();
                 Canvas.Sketch.Graphics.ReleaseHdc(dc);
             }
+
+            _openGL.PopMatrix();
         }
 
         public override void PopMatrix()
@@ -222,14 +194,64 @@ namespace SketchIt.Api.Renderers
             _openGL.PushMatrix();
         }
 
+        public override void ResetMatrix()
+        {
+            _openGL.Clear(OpenGL.GL_DEPTH_BUFFER_BIT);
+        }
+
+        public override void SetPerspective()
+        {
+            _openGL.Clear(OpenGL.GL_DEPTH_BUFFER_BIT);
+
+            _openGL.MatrixMode(MatrixMode.Modelview);
+            _openGL.LoadIdentity();
+
+            _openGL.MatrixMode(MatrixMode.Projection);
+            _openGL.LoadIdentity();
+            _openGL.Perspective(defCameraFOV, defCameraAspect, defCameraNear, defCameraFar);
+            _openGL.Scale(Canvas.Sketch.Zoom, Canvas.Sketch.Zoom, Canvas.Sketch.Zoom);
+
+            Translate(-defCameraX, -defCameraY, -defCameraZ);
+        }
+
+        public override void SetOrtho()
+        {
+            _openGL.Clear(OpenGL.GL_DEPTH_BUFFER_BIT);
+
+            _openGL.MatrixMode(MatrixMode.Projection);
+            _openGL.LoadIdentity();
+
+            _openGL.MatrixMode(MatrixMode.Modelview);
+            _openGL.LoadIdentity();
+            _openGL.Ortho(-Canvas.Width / 2, Canvas.Width / 2, -Canvas.Height / 2, Canvas.Height / 2, defCameraNear, defCameraFar);
+            _openGL.Scale(Canvas.Sketch.Zoom, Canvas.Sketch.Zoom, Canvas.Sketch.Zoom);
+
+            Translate(-Canvas.Width / 2, -Canvas.Height / 2, -defCameraZ);
+        }
+
+        private void Rotate(float angleX, float angleY, float angleZ)
+        {
+            _openGL.Rotate(angleX, angleY, angleZ);
+        }
+
         public override void Rotate(float angle)
         {
-            float x = (Canvas.Width / 2) + 1;
-            float y = (Canvas.Height / 2) - 1;
+            Rotate(0, 0, angle);
+        }
 
-            IRenderer.Translate(-x, -y);
-            _openGL.Rotate(0, 0, -angle);
-            IRenderer.Translate(x, y);
+        public override void RotateX(float angle)
+        {
+            Rotate(angle, 0, 0);
+        }
+
+        public override void RotateY(float angle)
+        {
+            Rotate(0, angle, 0);
+        }
+
+        public override void RotateZ(float angle)
+        {
+            Rotate(0, 0, angle);
         }
 
         public override void SetSize(float width, float height)
@@ -239,9 +261,14 @@ namespace SketchIt.Api.Renderers
 
         public override void Translate(float x, float y)
         {
-            x = MapX(x) + 1;
-            y = MapY(y) - 1;
-            _openGL.Translate(x, y, 0);
+            Translate(x, y, 0);
+        }
+
+        public override void Translate(float x, float y, float z)
+        {
+            //x = Functions.Map(x, 0, Canvas.Width, 0, 2);
+            //y = Functions.Map(y, 0, Canvas.Height, 0, -2);
+            _openGL.Translate(x, -y, z);
         }
     }
 }

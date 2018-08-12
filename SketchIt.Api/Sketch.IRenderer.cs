@@ -70,6 +70,11 @@ namespace SketchIt.Api
             ((IRenderer)Renderer).DrawShape(parms);
         }
 
+        public void DrawBox(BoxParameters parms)
+        {
+            ((IRenderer)Renderer).DrawBox(parms);
+        }
+
         public void PushMatrix()
         {
             ((IRenderer)Renderer).PushMatrix();
@@ -85,19 +90,34 @@ namespace SketchIt.Api
             ((IRenderer)Renderer).ResetMatrix();
         }
 
-        public void Scale(float x, float y)
+        public void Scale(float x, float y, float z)
         {
-            ((IRenderer)Renderer).Scale(x, y);
+            ((IRenderer)Renderer).Scale(x, y, z);
         }
 
-        public void Translate(float x, float y)
+        public void Translate(float x, float y, float z)
         {
-            ((IRenderer)Renderer).Translate(x, y);
+            ((IRenderer)Renderer).Translate(x, y, z);
         }
 
         public void Rotate(float angle)
         {
             ((IRenderer)Renderer).Rotate(angle);
+        }
+
+        public void RotateX(float angle)
+        {
+            ((IRenderer)Renderer).RotateX(angle);
+        }
+
+        public void RotateY(float angle)
+        {
+            ((IRenderer)Renderer).RotateY(angle);
+        }
+
+        public void RotateZ(float angle)
+        {
+            ((IRenderer)Renderer).RotateZ(angle);
         }
 
         public void BeginDraw()
@@ -128,6 +148,16 @@ namespace SketchIt.Api
         public void Texture(IImage image)
         {
             ((IRenderer)Renderer).Texture(image);
+        }
+
+        public void SetPerspective()
+        {
+            ((IRenderer)Renderer).SetPerspective();
+        }
+
+        public void SetOrtho()
+        {
+            ((IRenderer)Renderer).SetOrtho();
         }
     }
 }

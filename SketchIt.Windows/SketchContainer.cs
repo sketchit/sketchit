@@ -248,6 +248,11 @@ namespace SketchIt.Windows
             }
         }
 
+        public IntPtr WindowHandle
+        {
+            get { return Handle; }
+        }
+
         public void RendererChanging(RendererType rendererType)
         {
         }

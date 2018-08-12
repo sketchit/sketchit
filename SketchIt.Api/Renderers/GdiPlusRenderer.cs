@@ -462,6 +462,11 @@ namespace SketchIt.Api.Renderers
 
         public override void Translate(float x, float y)
         {
+            Translate(x, y, 0);
+        }
+
+        public override void Translate(float x, float y, float z)
+        {
             using (DeviceContextHandler dch = GetDeviceContextHandler())
             {
                 dch.DrawingSurface.TranslateTransform(x, y);
@@ -474,6 +479,11 @@ namespace SketchIt.Api.Renderers
             {
                 dch.DrawingSurface.RotateTransform(angle);
             }
+        }
+
+        public override void RotateZ(float angle)
+        {
+            Rotate(angle);
         }
 
         public override void Scale(float x, float y)

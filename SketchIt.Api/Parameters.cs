@@ -6,6 +6,39 @@ using System.Drawing;
 
 namespace SketchIt.Api
 {
+    public class BoxParameters
+    {
+        public BoxParameters(float size)
+            : this(size, size, size)
+        {
+        }
+
+        public BoxParameters(float w, float h, float d)
+        {
+            Width = w;
+            Height = h;
+            Depth = d;
+        }
+
+        public float Width
+        {
+            get;
+            set;
+        }
+
+        public float Height
+        {
+            get;
+            set;
+        }
+
+        public float Depth
+        {
+            get;
+            set;
+        }
+    }
+
     public class ShapeParameters
     {
         public ShapeParameters(Shape shape, float x, float y)
@@ -318,11 +351,18 @@ namespace SketchIt.Api
     public class LineParameters
     {
         public LineParameters(float x1, float y1, float x2, float y2)
+            : this(x1, y1, 0, x2, y2, 0)
+        {
+        }
+
+        public LineParameters(float x1, float y1, float z1, float x2, float y2, float z2)
         {
             X1 = x1;
             Y1 = y1;
+            Z1 = z1;
             X2 = x2;
             Y2 = y2;
+            Z2 = z2;
         }
 
         public float X1
@@ -337,6 +377,12 @@ namespace SketchIt.Api
             set;
         }
 
+        public float Z1
+        {
+            get;
+            set;
+        }
+
         public float X2
         {
             get;
@@ -344,6 +390,12 @@ namespace SketchIt.Api
         }
 
         public float Y2
+        {
+            get;
+            set;
+        }
+
+        public float Z2
         {
             get;
             set;

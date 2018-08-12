@@ -80,6 +80,16 @@ namespace SketchIt.Api.Static
             return (float)Math.Tanh((double)angle);
         }
 
+        public static float Radians(float degrees)
+        {
+            return degrees / 360f * Constants.TWO_PI;
+        }
+
+        public static float Degrees(float radians)
+        {
+            return radians / Constants.TWO_PI * 360f;
+        }
+
         public static float Map(float number, float start1, float stop1, float start2, float stop2)
         {
             float norm = Normalize(number, start1, stop1);

@@ -142,8 +142,8 @@ namespace SketchIt.Api.Renderers
         public virtual void DrawLine(LineParameters parms)
         {
             BeginShape(ShapeKind.Lines);
-            Vertex(parms.X1, parms.Y1);
-            Vertex(parms.X2, parms.Y2);
+            Vertex(parms.X1, parms.Y1, parms.Z1, 0, 0);
+            Vertex(parms.X2, parms.Y2, parms.Z2, 0, 0);
             EndShape(EndShapeMode.Open);
         }
 
@@ -177,6 +177,64 @@ namespace SketchIt.Api.Renderers
             Vertex(rect.X + rect.Width, rect.Y);
             Vertex(rect.X + rect.Width, rect.Y + rect.Height);
             Vertex(rect.X, rect.Y + rect.Height);
+            EndShape(EndShapeMode.Close);
+        }
+
+        public virtual void DrawBox(BoxParameters parms)
+        {
+            float left = -parms.Width / 2;
+            float top = parms.Height / 2;
+            float bottom = -parms.Height / 2;
+            float right = parms.Width / 2;
+            float front = parms.Depth / 2;
+            float back = -parms.Depth / 2;
+
+            //bottom
+            BeginShape(ShapeKind.Polygon);
+            Vertex(left, bottom, front);
+            Vertex(right, bottom, front);
+            Vertex(right, bottom, back);
+            Vertex(left, bottom, back);
+            EndShape(EndShapeMode.Close);
+
+            //left
+            BeginShape(ShapeKind.Polygon);
+            Vertex(left, bottom, back);
+            Vertex(left, bottom, front);
+            Vertex(left, top, front);
+            Vertex(left, top, back);
+            EndShape(EndShapeMode.Close);
+
+            //back
+            BeginShape(ShapeKind.Polygon);
+            Vertex(left, top, back);
+            Vertex(left, bottom, back);
+            Vertex(right, bottom, back);
+            Vertex(right, top, back);
+            EndShape(EndShapeMode.Close);
+
+            //right
+            BeginShape(ShapeKind.Polygon);
+            Vertex(right, top, back);
+            Vertex(right, bottom, back);
+            Vertex(right, bottom, front);
+            Vertex(right, top, front);
+            EndShape(EndShapeMode.Close);
+
+            //top
+            BeginShape(ShapeKind.Polygon);
+            Vertex(right, top, front);
+            Vertex(right, top, back);
+            Vertex(left, top, back);
+            Vertex(left, top, front);
+            EndShape(EndShapeMode.Close);
+
+            //front
+            BeginShape(ShapeKind.Polygon);
+            Vertex(left, top, front);
+            Vertex(right, top, front);
+            Vertex(right, bottom, front);
+            Vertex(left, bottom, front);
             EndShape(EndShapeMode.Close);
         }
 
@@ -215,7 +273,11 @@ namespace SketchIt.Api.Renderers
         public virtual void PushMatrix() => NotImplemented();
         public virtual void ResetMatrix() => NotImplemented();
         public virtual void Rotate(float angle) => NotImplemented();
+        public virtual void RotateX(float angle) => NotImplemented();
+        public virtual void RotateY(float angle) => NotImplemented();
+        public virtual void RotateZ(float angle) => NotImplemented();
         public virtual void Scale(float x, float y) => NotImplemented();
+        public virtual void Scale(float x, float y, float z) => NotImplemented();
         public virtual void SetSize(float width, float height) => NotImplemented();
 
         public virtual void Texture(IImage image)
@@ -225,6 +287,7 @@ namespace SketchIt.Api.Renderers
 
 
         public virtual void Translate(float x, float y) => NotImplemented();
+        public virtual void Translate(float x, float y, float z) => NotImplemented();
 
         public virtual void Vertex(float x, float y, float z, float u, float v)
         {
@@ -239,6 +302,9 @@ namespace SketchIt.Api.Renderers
 
         public virtual void SetTint(TintParameters parms) => NotImplemented();
         public virtual void SetNoTint() => NotImplemented();
+
+        public virtual void SetPerspective() => NotImplemented();
+        public virtual void SetOrtho() => NotImplemented();
         #endregion
 
         #region IRendererExtended
@@ -266,6 +332,7 @@ namespace SketchIt.Api.Renderers
         public void DrawBackground(Color color) => DrawBackground(new BackgroundParameters(color));
         public void BeginShape() => BeginShape(ShapeKind.Polygon);
         public void Vertex(float x, float y) => Vertex(x, y, 0, 0, 0);
+        public void Vertex(float x, float y, float z) => Vertex(x, y, z, 0, 0);
         public void SetTint(float gray) => SetTint(new TintParameters(Style.GetColor(gray)));
         public void SetTint(float gray, float alpha) => SetTint(new TintParameters(Style.GetColor(gray, alpha)));
         public void SetTint(float r, float g, float b) => SetTint(new TintParameters(Style.GetColor(r, g, b)));

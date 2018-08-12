@@ -167,7 +167,11 @@ namespace SketchIt.Windows
         /// </summary>
         public static int LoopCount { get { return Sketch.LoopCount; } }
 
+        /// <summary>
+        /// Returns the numerical key code of the pressed key.
+        /// </summary>
         public static int KeyCode { get { return Sketch.KeyCode; } }
+
         public static char KeyChar { get { return Sketch.KeyChar; } }
 
         /// <summary>
@@ -268,6 +272,7 @@ namespace SketchIt.Windows
         /// <param name="x2"></param>
         /// <param name="y2"></param>
         public static void DrawLine(float x1, float y1, float x2, float y2) { CurrentLayer.Renderer.DrawLine(new LineParameters(x1, y1, x2, y2)); }
+        public static void DrawLine(float x1, float y1, float z1, float x2, float y2, float z2) { CurrentLayer.Renderer.DrawLine(new LineParameters(x1, y1, z1, x2, y2, z2)); }
 
         /// <summary>
         /// Draws an image to the canvas.
@@ -304,6 +309,9 @@ namespace SketchIt.Windows
         /// <param name="width">The width of the bounding rectangle.</param>
         /// <param name="height">The height of the bounding rectangle.</param>
         public static void DrawText(object text, float x, float y, float width, float height) { CurrentLayer.Renderer.DrawText(new TextParameters(text, x, y, width, height)); }
+
+        public static void DrawBox(float size) { CurrentLayer.Renderer.DrawBox(new BoxParameters(size)); }
+        public static void DrawBox(float w, float h, float d) { CurrentLayer.Renderer.DrawBox(new BoxParameters(w, h, d)); }
 
         //public static Point[][] GetTextPoints(string text) { return Sketch.GetTextPoints(text); }
 
@@ -428,8 +436,13 @@ namespace SketchIt.Windows
         public static void PopMatrix() { CurrentLayer.Renderer.PopMatrix(); }
         public static void ResetMatrix() { CurrentLayer.Renderer.ResetMatrix(); }
         public static void Scale(float x, float y) { CurrentLayer.Renderer.Scale(x, y); }
+        public static void Scale(float x, float y, float z) { CurrentLayer.Renderer.Scale(x, y, z); }
         public static void Translate(float x, float y) { CurrentLayer.Renderer.Translate(x, y); }
+        public static void Translate(float x, float y, float z) { CurrentLayer.Renderer.Translate(x, y, z); }
         public static void Rotate(float angle) { CurrentLayer.Renderer.Rotate(angle); }
+        public static void RotateX(float angle) { CurrentLayer.Renderer.RotateX(angle); }
+        public static void RotateY(float angle) { CurrentLayer.Renderer.RotateY(angle); }
+        public static void RotateZ(float angle) { CurrentLayer.Renderer.RotateZ(angle); }
         public static void SetUpdateInterval(int interval) { Sketch.SetUpdateInterval(interval); }
 
         /// <summary>
@@ -481,5 +494,8 @@ namespace SketchIt.Windows
         {
             Sketch.RunThread(methodName, args);
         }
+
+        public static void SetPerspective() { CurrentLayer.Renderer.SetPerspective(); }
+        public static void SetOrtho() { CurrentLayer.Renderer.SetOrtho(); }
     }
 }

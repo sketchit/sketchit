@@ -26,5 +26,8 @@
         void DrawBackground(Color color, float alpha);
         void DrawBackground(Color color);
         void Vertex(float x, float y);
+        void Vertex(float x, float y, float z);
+        void Scale(float x, float y);
+        void Translate(float x, float y);
     }
 }
