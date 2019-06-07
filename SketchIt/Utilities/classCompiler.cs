@@ -129,9 +129,13 @@ namespace SketchIt.Utilities
             Uri appUri = new Uri(Application.StartupPath + "\\");
             List<string> list = new List<string>(new string[]
             {
-                (fullPath ? Application.StartupPath + "\\" : "") + "SketchIt.Api.dll",
+                (fullPath ? Application.StartupPath + "\\" : "") + "SketchIt.Api.NetStandard.dll",
                 (fullPath ? Application.StartupPath + "\\" : "") + "SketchIt.Windows.dll",
-                (fullPath ? Application.StartupPath + "\\" : "") + "SharpGL.dll"
+                (fullPath ? Application.StartupPath + "\\" : "") + "SketchIt.Windows.Renderers.dll",
+                (fullPath ? Application.StartupPath + "\\" : "") + "SharpGL.dll",
+                (fullPath ? Application.StartupPath + "\\" : "") + "System.Drawing.Common.dll",
+                (fullPath ? Application.StartupPath + "\\" : "") + "netstandard.dll",
+                //(fullPath ? Application.StartupPath + "\\" : "") + "Svg.dll"
             });
 
             foreach (ILibrary library in Program.GetLibraries())
@@ -203,126 +207,130 @@ namespace SketchIt.Utilities
                 List<string> assemblyList = new List<string>(new string[] {
                     "System.dll",
                     "System.Windows.Forms.dll",
-                    "System.Drawing.dll"
+                    "System.Drawing.dll",
+                    //"System.Drawing.Common.dll",
+                    //"netstandard.dll"
                 });
 
                 assemblyList.AddRange(GetAssemblyList());
 
                 Dictionary<string, string> options = new Dictionary<string, string>();
-                CSharpCodeProvider provider = new CSharpCodeProvider();
-                CompilerParameters parameters = new CompilerParameters(assemblyList.ToArray())
+                using (CSharpCodeProvider provider = new CSharpCodeProvider())
                 {
-                    GenerateInMemory = IsBackgroundCompiler,
-                    GenerateExecutable = !IsBackgroundCompiler,
-                    OutputAssembly = outputFolder + (IsBackgroundCompiler ? "\\sketch.tmp" : "\\sketch.exe"),
-                    CompilerOptions = "/target:winexe /optimize /win32icon:\"" + Application.StartupPath + "\\SketchIt.ico\"",
-                };
-
-                int retries = 0;
-                while (File.Exists(parameters.OutputAssembly) && retries < 10)
-                {
-                    try
+                    CompilerParameters parameters = new CompilerParameters(assemblyList.ToArray())
                     {
-                        File.Delete(parameters.OutputAssembly);
-                    }
-                    catch
-                    {
-                        retries++;
-                    }
-                }
+                        GenerateInMemory = IsBackgroundCompiler,
+                        GenerateExecutable = !IsBackgroundCompiler,
+                        OutputAssembly = outputFolder + (IsBackgroundCompiler ? "\\sketch.tmp" : "\\sketch.exe"),
+                        CompilerOptions = "/target:winexe /optimize /win32icon:\"" + Application.StartupPath + "\\SketchIt.ico\"",
+                    };
 
-                if (!IsBackgroundCompiler)
-                {
-                    if (!File.Exists(Application.StartupPath + "\\SketchIt.ico"))
-                    {
-                        using (FileStream stream = new FileStream(Application.StartupPath + "\\SketchIt.ico", FileMode.Create))
-                            Program.MainForm.Icon.Save(stream);
-                    }
-
-                    parameters.EmbeddedResources.Add(Application.StartupPath + "\\SketchIt.ico");
-
-                    foreach (string filename in GetAssemblyList(true))
-                    {
-                        parameters.EmbeddedResources.Add(filename);
-                    }
-
-                    foreach (ILibrary library in Program.Libraries)
-                    {
-                        FileInfo libraryFile = new FileInfo(library.GetType().Assembly.Location);
-                        List<string> dependancies = new List<string>(library.AdditionalDependancies);
-
-                        if (!library.Embeddable)
-                        {
-                            dependancies.Add(libraryFile.Name);
-                        }
-
-                        foreach (string dependancy in dependancies)
-                        {
-                            FileInfo destinationFile = new FileInfo(outputFolder + "\\" + dependancy);
-                            string sourceFile = libraryFile.DirectoryName + "\\" + dependancy;
-
-                            if (!Directory.Exists(destinationFile.DirectoryName))
-                            {
-                                Directory.CreateDirectory(destinationFile.DirectoryName);
-                            }
-
-                            if (File.Exists(destinationFile.FullName))
-                            {
-                                try
-                                {
-                                    File.Delete(destinationFile.FullName);
-                                }
-                                catch
-                                {
-                                }
-                            }
-
-                            if (!File.Exists(destinationFile.FullName))
-                            {
-                                File.Copy(sourceFile, destinationFile.FullName);
-                            }
-                        }
-                    }
-                }
-
-                CompilerResults results = provider.CompileAssemblyFromSource(parameters, sourceFiles.ToArray());
-
-                if (results.Errors.Count == 0)
-                {
-                    Output = results.CompiledAssembly;
-                }
-                else
-                {
-                    foreach (CompilerError error in results.Errors)
+                    int retries = 0;
+                    while (File.Exists(parameters.OutputAssembly) && retries < 10)
                     {
                         try
                         {
-                            FileInfo fileInfo = string.IsNullOrEmpty(error.FileName) ? null : new FileInfo(Path.GetFileNameWithoutExtension(error.FileName));
-                            int fileIndex = fileInfo != null ? int.Parse(fileInfo.Extension.Substring(1)) - 1 : -1;
-
-                            if (fileIndex < 0)
-                            {
-                            }
-                            else if (error.Line < codeOffset + sourceCode[fileIndex].UsingLineCount)
-                            {
-                                error.Line -= usingOffset;
-                            }
-                            else if (error.Line - codeOffset > sourceCode[fileIndex].CodeLineCount)
-                            {
-                                error.Line = sourceCode[fileIndex].CodeLineCount;
-                            }
-                            else
-                            {
-                                error.Line -= codeOffset;
-                            }
+                            File.Delete(parameters.OutputAssembly);
                         }
-                        catch (Exception ex)
+                        catch
                         {
-                            throw ex;
+                            retries++;
                         }
                     }
 
-                    CompilerErrors = results.Errors;
+                    if (!IsBackgroundCompiler)
+                    {
+                        if (!File.Exists(Application.StartupPath + "\\SketchIt.ico"))
+                        {
+                            using (FileStream stream = new FileStream(Application.StartupPath + "\\SketchIt.ico", FileMode.Create))
+                                Program.MainForm.Icon.Save(stream);
+                        }
+
+                        parameters.EmbeddedResources.Add(Application.StartupPath + "\\SketchIt.ico");
+
+                        foreach (string filename in GetAssemblyList(true))
+                        {
+                            parameters.EmbeddedResources.Add(filename);
+                        }
+
+                        foreach (ILibrary library in Program.Libraries)
+                        {
+                            FileInfo libraryFile = new FileInfo(library.GetType().Assembly.Location);
+                            List<string> dependancies = new List<string>(library.AdditionalDependancies);
+
+                            if (!library.Embeddable)
+                            {
+                                dependancies.Add(libraryFile.Name);
+                            }
+
+                            foreach (string dependancy in dependancies)
+                            {
+                                FileInfo destinationFile = new FileInfo(outputFolder + "\\" + dependancy);
+                                string sourceFile = libraryFile.DirectoryName + "\\" + dependancy;
+
+                                if (!Directory.Exists(destinationFile.DirectoryName))
+                                {
+                                    Directory.CreateDirectory(destinationFile.DirectoryName);
+                                }
+
+                                if (File.Exists(destinationFile.FullName))
+                                {
+                                    try
+                                    {
+                                        File.Delete(destinationFile.FullName);
+                                    }
+                                    catch
+                                    {
+                                    }
+                                }
+
+                                if (!File.Exists(destinationFile.FullName))
+                                {
+                                    File.Copy(sourceFile, destinationFile.FullName);
+                                }
+                            }
+                        }
+                    }
+
+                    CompilerResults results = provider.CompileAssemblyFromSource(parameters, sourceFiles.ToArray());
+
+                    if (results.Errors.Count == 0)
+                    {
+                        Output = results.CompiledAssembly;
+                    }
+                    else
+                    {
+                        foreach (CompilerError error in results.Errors)
+                        {
+                            try
+                            {
+                                FileInfo fileInfo = string.IsNullOrEmpty(error.FileName) ? null : new FileInfo(Path.GetFileNameWithoutExtension(error.FileName));
+                                int fileIndex = fileInfo != null ? int.Parse(fileInfo.Extension.Substring(1)) - 1 : -1;
+
+                                if (fileIndex < 0)
+                                {
+                                }
+                                else if (error.Line < codeOffset + sourceCode[fileIndex].UsingLineCount)
+                                {
+                                    error.Line -= usingOffset;
+                                }
+                                else if (error.Line - codeOffset > sourceCode[fileIndex].CodeLineCount)
+                                {
+                                    error.Line = sourceCode[fileIndex].CodeLineCount;
+                                }
+                                else
+                                {
+                                    error.Line -= codeOffset;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                throw ex;
+                            }
+                        }
+
+                        CompilerErrors = results.Errors;
+                    }
                 }
             }
             catch (Exception ex)

@@ -1,6 +1,7 @@
 ﻿using SketchIt.Api;
 using SketchIt.Api.Static;
 using SketchIt.Utilities;
+using SketchIt.Windows.Renderers;
 using System.Windows.Forms;
 using static SketchIt.Api.Static.Functions;
 using Drawing = System.Drawing;
@@ -18,8 +19,11 @@ namespace SketchIt
 
         private void SplashScreenForm_Load(object sender, System.EventArgs e)
         {
+            Sketch.DefaultRendererType = typeof(GdiPlusRenderer);
+
             _animation = new SplashAnimation();
             _animation.Start(ctlCanvas);
+            System.Threading.Thread.Sleep(50);
             Size = new Drawing.Size(_animation.Width, _animation.Height);
             CenterToScreen();
             ActiveControl = ctlCanvas;

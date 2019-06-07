@@ -41,6 +41,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing.Common, Version=4.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Drawing.Common.4.5.1\lib\net461\System.Drawing.Common.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -64,9 +67,13 @@
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SketchIt.Api\SketchIt.Api.csproj">
-      <Project>{abbf752c-958b-4059-a3df-690fba4a4457}</Project>
-      <Name>SketchIt.Api</Name>
+    <ProjectReference Include="..\SketchIt.Api.NetStandard\SketchIt.Api.NetStandard.csproj">
+      <Project>{d568790a-a35a-418b-a98d-5d9e1688e71d}</Project>
+      <Name>SketchIt.Api.NetStandard</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SketchIt.Windows.Renderers\SketchIt.Windows.Renderers.csproj">
+      <Project>{f30bd137-cd02-48f7-abe7-02537f25268c}</Project>
+      <Name>SketchIt.Windows.Renderers</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -79,6 +86,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Resources\SketchIt.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -24,6 +24,7 @@ namespace SketchIt
         private float _currentScale = 1f;
         private Sketch _sketch;
         private string _projectFile = null;
+        private Status _startStatus;
 
         public MainForm()
         {
@@ -478,11 +479,11 @@ namespace SketchIt
         private void ctlCanvas_SizeChanged(object sender, EventArgs e)
         {
             if (ctlCanvas.Tag != null) return;
-            if (ctlCanvas.Sketch == null) return;
             if (!pnlPreviewPane.Visible) return;
 
             ctlCanvas.Tag = DateTime.Now;
             ctlCanvas.Zoom(1 / _currentScale);
+            //ctlCanvas.Zoom(1 / _sketch.Zoom);
 
             int maxWidth = pnlCanvasContainer.Width;
             int maxHeight = pnlCanvasContainer.Height;
@@ -545,6 +546,8 @@ namespace SketchIt
                             //BuildPreview();
                             //return;
                         }
+
+                        _sketch.Exit();
                     }
 
                     _consoleWriter.Clear();
@@ -553,7 +556,9 @@ namespace SketchIt
                     pnlCanvasContainer.Controls.Remove(ctlCanvas);
                     ctlCanvas.Dispose();
                     ctlCanvas = new Windows.SketchContainer();
+                    ctlCanvas.CreateControl();
                     ctlCanvas.DesignMode = true;
+                    ctlCanvas.SizeChanged += ctlCanvas_SizeChanged;
                     pnlCanvasContainer.Controls.Add(ctlCanvas);
 
                     _sketch = new Sketch();
@@ -599,6 +604,22 @@ namespace SketchIt
                 MessageBox.Show(ex.Message, "Live Preview", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        //delegate void AddCanvas(Control control);
+        //private void StartSketch()
+        //{
+        //    ctlCanvas = new Windows.SketchContainer();
+        //    ctlCanvas.DesignMode = true;
+        //    pnlCanvasContainer.Invoke(new AddCanvas(delegate (Control c) { pnlCanvasContainer.Controls.Add(c); }), new object[] { ctlCanvas });
+        //    //pnlCanvasContainer.Controls.Add(ctlCanvas);
+
+        //    _sketch = new Sketch();
+        //    _sketch.UseDefaultConsole = false;
+
+        //    Windows.Application.Set(_sketch);
+        //    Applet applet = BackgroundCompiler.Output.CreateInstance("App") as Applet;
+        //    _sketch.Start(applet, ctlCanvas);
+        //}
 
         private void btnLivePreview_CheckStateChanged(object sender, EventArgs e)
         {
@@ -702,7 +723,10 @@ namespace SketchIt
 
         private void StartApp(int retries = 0)
         {
-            Status status = retries == 0 ? Status.Set("Preparing to launch sketch...") : null;
+            if (_startStatus == null)
+            {
+                _startStatus = Status.Set("Preparing to launch sketch...");
+            }
 
             try
             {
@@ -743,10 +767,10 @@ namespace SketchIt
                 }
                 else
                 {
-                    if (status != null)
+                    if (_startStatus != null)
                     {
-                        status.Dispose();
-                        status = null;
+                        _startStatus.Dispose();
+                        _startStatus = null;
                     }
 
                     MessageBox.Show(ex.Message, "Launch App", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -757,9 +781,9 @@ namespace SketchIt
                 UpdateToolbarButtons();
             }
 
-            if (status != null)
+            if (_startStatus != null)
             {
-                status.Dispose();
+                _startStatus.Dispose();
             }
         }
 

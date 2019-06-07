@@ -58,12 +58,12 @@ namespace SketchIt.Api.Interfaces
         /// <summary>
         /// Called by the sketch when the renderer is changing.
         /// </summary>
-        void RendererChanging(RendererType rendererType);
+        void RendererChanging(Type rendererType);
 
         /// <summary>
         /// Called by the sketch after the renderer is changed.
         /// </summary>
-        void RendererChanged(RendererType rendererType);
+        void RendererChanged(Type rendererType);
 
         IntPtr WindowHandle { get; }
     }

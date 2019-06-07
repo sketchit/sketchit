@@ -16,19 +16,20 @@ namespace SketchIt
         public static BusyDialog BusyDialog { get; set; }
         public static SplashScreenForm SplashScreen { get; set; }
         public static ILibrary[] Libraries { get; private set; }
+        private static object Locker = new object();
 
         [STAThread]
         static void Main()
         {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
             IsRunning = true;
 
             AppDomain.CurrentDomain.AssemblyResolve += delegate (object sender, ResolveEventArgs e)
               {
                   return GetAssembly(e.Name);
               };
-
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
 
             BusyDialog.Initialize();
 
@@ -78,38 +79,39 @@ namespace SketchIt
 
         public static ILibrary[] GetLibraries(bool refresh = false)
         {
-            if (Libraries == null || refresh)
+            lock (Locker)
             {
-                List<ILibrary> libraries = new List<ILibrary>();
-
-                foreach (string filename in Directory.GetFiles(Application.StartupPath + "\\libraries", "*.dll", SearchOption.AllDirectories))
+                if (Libraries == null || refresh)
                 {
-                    try
+                    List<ILibrary> libraries = new List<ILibrary>();
+
+                    foreach (string filename in Directory.GetFiles(Application.StartupPath + "\\libraries", "*.dll", SearchOption.AllDirectories))
                     {
-                        Assembly assembly = Assembly.LoadFrom(filename);
-
-                        foreach (Type type in assembly.GetTypes())
+                        try
                         {
-                            if (type.GetInterface("SketchIt.Api.Interfaces.ILibrary") != null)
-                            {
-                                ILibrary library = Activator.CreateInstance(type) as ILibrary;
+                            Assembly assembly = Assembly.LoadFrom(filename);
 
-                                if (library != null)
+                            foreach (Type type in assembly.GetTypes())
+                            {
+                                if (type.GetInterface("SketchIt.Api.Interfaces.ILibrary", true) != null)
                                 {
-                                    libraries.Add(library);
+                                    if (Activator.CreateInstance(type) is ILibrary library)
+                                    {
+                                        libraries.Add(library);
+                                    }
                                 }
                             }
                         }
+                        catch
+                        {
+                        }
                     }
-                    catch
-                    {
-                    }
+
+                    Libraries = libraries.ToArray();
                 }
 
-                Libraries = libraries.ToArray();
+                return Libraries;
             }
-
-            return Libraries;
         }
 
         public static Assembly GetAssembly(string assemblyName)

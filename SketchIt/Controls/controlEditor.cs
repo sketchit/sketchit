@@ -1,6 +1,9 @@
-﻿using ScintillaNET;
+﻿using AutocompleteMenuNS;
+using ScintillaNET;
 using SketchIt.Utilities;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Reflection;
 
@@ -8,6 +11,7 @@ namespace SketchIt.Controls
 {
     public class EditorControl : Scintilla
     {
+        private AutocompleteMenu _autocompleteMenu;
         private string _keywordList = "class extends implements import interface new case do while else if in switch throw get set function var try catch finally while with default break continue delete return each const namespace package include use is as instanceof typeof author copy default deprecated eventType example exampleText exception haxe inheritDoc internal link mtasc mxmlc param private return see serial serialData serialField since throws usage version langversion playerversion productversion dynamic private public partial static intrinsic internal native override protected AS3 final super this arguments null Infinity NaN undefined true false abstract as base bool break by byte case catch char checked class const continue decimal default delegate do double descending explicit event extern else enum false finally fixed float for foreach from goto group if implicit in int interface internal into is lock long new null namespace object operator out override orderby params private protected public readonly ref return switch struct sbyte sealed short sizeof stackalloc static string select this throw true try typeof uint ulong unchecked unsafe ushort using var virtual volatile void while where yield";
 
         public EditorControl()
@@ -39,6 +43,9 @@ namespace SketchIt.Controls
 
             SetKeywords(1, Program.MainForm.Parser.KnownKeywords);
             SetKeywords(3, Program.MainForm.Parser.KnownTypes);
+
+            _autocompleteMenu = new AutocompleteMenu();
+            _autocompleteMenu.TargetControlWrapper = new ScintillaWrapper(this);
         }
 
         internal void UpdateAppearance()
@@ -301,6 +308,7 @@ namespace SketchIt.Controls
                         }
 
                         AutoCShow(wrd.Length, lst);
+                        //CallTipShow(pos, "This is something\r\nThat can be *used*");
                     }
                     break;
             }
@@ -312,6 +320,43 @@ namespace SketchIt.Controls
         {
             Margins[0].Type = MarginType.Number;
             Margins[0].Width = Math.Max((Zoom + 11) * 3, Lines.Count.ToString().Length * (Zoom + 11));
+        }
+    }
+
+    internal class DynamicCollection : IEnumerable<AutocompleteItem>
+    {
+        private string[] _words;
+
+        public DynamicCollection(string[] words)
+        {
+            _words = words;
+        }
+
+        public IEnumerator<AutocompleteItem> GetEnumerator()
+        {
+            return BuildList().GetEnumerator();
+        }
+
+        private IEnumerable<AutocompleteItem> BuildList()
+        {
+            //find all words of the text
+            var words = new Dictionary<string, string>();
+            foreach (string word in _words)
+                words[word] = word;
+
+            //return autocomplete items
+            foreach (var word in words.Keys)
+            {
+                AutocompleteItem item = new AutocompleteItem(word);
+                item.ToolTipTitle = word;
+                item.ToolTipText = "This is something";
+                yield return item;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

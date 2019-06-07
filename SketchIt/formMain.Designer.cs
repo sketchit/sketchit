@@ -81,6 +81,10 @@
             this.sspMain = new System.Windows.Forms.StatusStrip();
             this.tslStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.tslParseTime = new System.Windows.Forms.ToolStripStatusLabel();
+            this.openProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.mnsMain.SuspendLayout();
             this.tlsMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pnlPreviewPane)).BeginInit();
@@ -95,6 +99,7 @@
             // 
             // mnsMain
             // 
+            this.mnsMain.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.mnsMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuInfo,
             this.mnuFile,
@@ -102,7 +107,7 @@
             this.helpToolStripMenuItem});
             this.mnsMain.Location = new System.Drawing.Point(0, 0);
             this.mnsMain.Name = "mnsMain";
-            this.mnsMain.Size = new System.Drawing.Size(994, 24);
+            this.mnsMain.Size = new System.Drawing.Size(884, 28);
             this.mnsMain.TabIndex = 1;
             this.mnsMain.Text = "menuStrip1";
             // 
@@ -113,7 +118,7 @@
             this.mnuDownloadLatest});
             this.mnuInfo.Image = global::SketchIt.Properties.Resources.Info;
             this.mnuInfo.Name = "mnuInfo";
-            this.mnuInfo.Size = new System.Drawing.Size(28, 20);
+            this.mnuInfo.Size = new System.Drawing.Size(32, 24);
             this.mnuInfo.Tag = "info";
             this.mnuInfo.Text = "Update Available";
             this.mnuInfo.ToolTipText = "An update is available";
@@ -130,14 +135,18 @@
             // mnuFile
             // 
             this.mnuFile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openProjectToolStripMenuItem,
+            this.toolStripSeparator8,
             this.mnuNewSketch,
             this.newSourceFileToolStripMenuItem,
             this.toolStripSeparator3,
+            this.saveAllToolStripMenuItem,
+            this.toolStripSeparator7,
             this.mnuRemoveFromProject,
             this.toolStripSeparator4,
             this.mnuExit});
             this.mnuFile.Name = "mnuFile";
-            this.mnuFile.Size = new System.Drawing.Size(37, 20);
+            this.mnuFile.Size = new System.Drawing.Size(37, 24);
             this.mnuFile.Text = "&File";
             this.mnuFile.DropDownOpening += new System.EventHandler(this.mnuFile_DropDownOpening);
             // 
@@ -192,7 +201,7 @@
             this.toolStripSeparator6,
             this.mnuSetScreenSaver});
             this.sketchToolStripMenuItem.Name = "sketchToolStripMenuItem";
-            this.sketchToolStripMenuItem.Size = new System.Drawing.Size(54, 20);
+            this.sketchToolStripMenuItem.Size = new System.Drawing.Size(54, 24);
             this.sketchToolStripMenuItem.Text = "&Sketch";
             // 
             // mnuRun
@@ -234,7 +243,7 @@
             this.toolStripSeparator5,
             this.mnuAbout});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 24);
             this.helpToolStripMenuItem.Text = "Help";
             // 
             // mnuHelp
@@ -270,10 +279,10 @@
             // 
             this.tabWindows.AutoSize = true;
             this.tabWindows.Dock = System.Windows.Forms.DockStyle.Top;
-            this.tabWindows.Location = new System.Drawing.Point(0, 51);
+            this.tabWindows.Location = new System.Drawing.Point(0, 55);
             this.tabWindows.Name = "tabWindows";
             this.tabWindows.Padding = new System.Windows.Forms.Padding(2, 2, 2, 0);
-            this.tabWindows.Size = new System.Drawing.Size(496, 2);
+            this.tabWindows.Size = new System.Drawing.Size(416, 2);
             this.tabWindows.TabIndex = 3;
             this.tabWindows.TabButtonClick += new SketchIt.Controls.TabButtonsControl.TabButtonEventHandler(this.TabWindows_TabButtonClick);
             // 
@@ -293,9 +302,9 @@
             this.toolStripSeparator2,
             this.btnErrorList,
             this.btnLivePreview});
-            this.tlsMain.Location = new System.Drawing.Point(0, 24);
+            this.tlsMain.Location = new System.Drawing.Point(0, 28);
             this.tlsMain.Name = "tlsMain";
-            this.tlsMain.Size = new System.Drawing.Size(994, 27);
+            this.tlsMain.Size = new System.Drawing.Size(884, 27);
             this.tlsMain.TabIndex = 5;
             this.tlsMain.Text = "toolStrip1";
             // 
@@ -430,7 +439,7 @@
             // pnlPreviewPane
             // 
             this.pnlPreviewPane.Dock = System.Windows.Forms.DockStyle.Right;
-            this.pnlPreviewPane.Location = new System.Drawing.Point(500, 51);
+            this.pnlPreviewPane.Location = new System.Drawing.Point(420, 55);
             this.pnlPreviewPane.Name = "pnlPreviewPane";
             this.pnlPreviewPane.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -442,8 +451,8 @@
             // pnlPreviewPane.Panel2
             // 
             this.pnlPreviewPane.Panel2.Controls.Add(this.txtConsoleOutput);
-            this.pnlPreviewPane.Size = new System.Drawing.Size(494, 562);
-            this.pnlPreviewPane.SplitterDistance = 404;
+            this.pnlPreviewPane.Size = new System.Drawing.Size(464, 484);
+            this.pnlPreviewPane.SplitterDistance = 347;
             this.pnlPreviewPane.TabIndex = 7;
             this.pnlPreviewPane.Visible = false;
             // 
@@ -454,7 +463,7 @@
             this.pnlCanvasContainer.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlCanvasContainer.Location = new System.Drawing.Point(0, 27);
             this.pnlCanvasContainer.Name = "pnlCanvasContainer";
-            this.pnlCanvasContainer.Size = new System.Drawing.Size(494, 377);
+            this.pnlCanvasContainer.Size = new System.Drawing.Size(464, 320);
             this.pnlCanvasContainer.TabIndex = 5;
             this.pnlCanvasContainer.SizeChanged += new System.EventHandler(this.ctlCanvas_SizeChanged);
             // 
@@ -462,9 +471,9 @@
             // 
             this.ctlCanvas.BackColor = System.Drawing.Color.Black;
             this.ctlCanvas.DesignMode = false;
-            this.ctlCanvas.Location = new System.Drawing.Point(137, 85);
+            this.ctlCanvas.Location = new System.Drawing.Point(128, 86);
             this.ctlCanvas.Name = "ctlCanvas";
-            this.ctlCanvas.Size = new System.Drawing.Size(200, 200);
+            this.ctlCanvas.Size = new System.Drawing.Size(188, 203);
             this.ctlCanvas.Sketch = null;
             this.ctlCanvas.TabIndex = 3;
             this.ctlCanvas.Text = "canvas1";
@@ -475,7 +484,7 @@
             this.lblPreparingPreview.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblPreparingPreview.Location = new System.Drawing.Point(0, 0);
             this.lblPreparingPreview.Name = "lblPreparingPreview";
-            this.lblPreparingPreview.Size = new System.Drawing.Size(494, 377);
+            this.lblPreparingPreview.Size = new System.Drawing.Size(464, 320);
             this.lblPreparingPreview.TabIndex = 4;
             this.lblPreparingPreview.Text = "Preparing Live Preview...";
             this.lblPreparingPreview.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -489,7 +498,7 @@
             this.btnRestartPreview});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(494, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(464, 27);
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -529,7 +538,7 @@
             this.txtConsoleOutput.Multiline = true;
             this.txtConsoleOutput.Name = "txtConsoleOutput";
             this.txtConsoleOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtConsoleOutput.Size = new System.Drawing.Size(494, 154);
+            this.txtConsoleOutput.Size = new System.Drawing.Size(464, 133);
             this.txtConsoleOutput.TabIndex = 0;
             // 
             // lvwPreviewErrors
@@ -544,7 +553,7 @@
             this.lvwPreviewErrors.Location = new System.Drawing.Point(0, 0);
             this.lvwPreviewErrors.Name = "lvwPreviewErrors";
             this.lvwPreviewErrors.OwnerDraw = true;
-            this.lvwPreviewErrors.Size = new System.Drawing.Size(496, 100);
+            this.lvwPreviewErrors.Size = new System.Drawing.Size(416, 102);
             this.lvwPreviewErrors.TabIndex = 0;
             this.lvwPreviewErrors.UseCompatibleStateImageBehavior = false;
             this.lvwPreviewErrors.View = System.Windows.Forms.View.Details;
@@ -557,14 +566,14 @@
             // lvcMessage
             // 
             this.lvcMessage.Text = "Message";
-            this.lvcMessage.Width = 436;
+            this.lvcMessage.Width = 356;
             // 
             // splPreviewPane
             // 
             this.splPreviewPane.Dock = System.Windows.Forms.DockStyle.Right;
-            this.splPreviewPane.Location = new System.Drawing.Point(496, 51);
+            this.splPreviewPane.Location = new System.Drawing.Point(416, 55);
             this.splPreviewPane.Name = "splPreviewPane";
-            this.splPreviewPane.Size = new System.Drawing.Size(4, 562);
+            this.splPreviewPane.Size = new System.Drawing.Size(4, 484);
             this.splPreviewPane.TabIndex = 8;
             this.splPreviewPane.TabStop = false;
             this.splPreviewPane.Visible = false;
@@ -573,28 +582,29 @@
             // 
             this.pnlErrorList.Controls.Add(this.lvwPreviewErrors);
             this.pnlErrorList.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pnlErrorList.Location = new System.Drawing.Point(0, 513);
+            this.pnlErrorList.Location = new System.Drawing.Point(0, 437);
             this.pnlErrorList.Name = "pnlErrorList";
-            this.pnlErrorList.Size = new System.Drawing.Size(496, 100);
+            this.pnlErrorList.Size = new System.Drawing.Size(416, 102);
             this.pnlErrorList.TabIndex = 10;
             // 
             // splErrorList
             // 
             this.splErrorList.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.splErrorList.Location = new System.Drawing.Point(0, 509);
+            this.splErrorList.Location = new System.Drawing.Point(0, 433);
             this.splErrorList.Name = "splErrorList";
-            this.splErrorList.Size = new System.Drawing.Size(496, 4);
+            this.splErrorList.Size = new System.Drawing.Size(416, 4);
             this.splErrorList.TabIndex = 11;
             this.splErrorList.TabStop = false;
             // 
             // sspMain
             // 
+            this.sspMain.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.sspMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tslStatus,
             this.tslParseTime});
-            this.sspMain.Location = new System.Drawing.Point(0, 613);
+            this.sspMain.Location = new System.Drawing.Point(0, 539);
             this.sspMain.Name = "sspMain";
-            this.sspMain.Size = new System.Drawing.Size(994, 23);
+            this.sspMain.Size = new System.Drawing.Size(884, 22);
             this.sspMain.SizingGrip = false;
             this.sspMain.TabIndex = 13;
             // 
@@ -602,23 +612,52 @@
             // 
             this.tslStatus.Image = ((System.Drawing.Image)(resources.GetObject("tslStatus.Image")));
             this.tslStatus.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.tslStatus.Margin = new System.Windows.Forms.Padding(0, 1, 0, 1);
             this.tslStatus.Name = "tslStatus";
-            this.tslStatus.Padding = new System.Windows.Forms.Padding(1);
-            this.tslStatus.Size = new System.Drawing.Size(979, 18);
+            this.tslStatus.Size = new System.Drawing.Size(869, 20);
             this.tslStatus.Spring = true;
             this.tslStatus.Text = "Ready";
             this.tslStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // tslParseTime
             // 
+            this.tslParseTime.Margin = new System.Windows.Forms.Padding(0, 1, 0, 1);
             this.tslParseTime.Name = "tslParseTime";
-            this.tslParseTime.Size = new System.Drawing.Size(0, 18);
+            this.tslParseTime.Size = new System.Drawing.Size(0, 20);
+            // 
+            // openProjectToolStripMenuItem
+            // 
+            this.openProjectToolStripMenuItem.Name = "openProjectToolStripMenuItem";
+            this.openProjectToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.openProjectToolStripMenuItem.Size = new System.Drawing.Size(255, 22);
+            this.openProjectToolStripMenuItem.Tag = "open-project";
+            this.openProjectToolStripMenuItem.Text = "Open Project...";
+            this.openProjectToolStripMenuItem.Click += new System.EventHandler(this.MenuItemClicked);
+            // 
+            // saveAllToolStripMenuItem
+            // 
+            this.saveAllToolStripMenuItem.Name = "saveAllToolStripMenuItem";
+            this.saveAllToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.saveAllToolStripMenuItem.Size = new System.Drawing.Size(255, 22);
+            this.saveAllToolStripMenuItem.Tag = "save-all";
+            this.saveAllToolStripMenuItem.Text = "Save All";
+            this.saveAllToolStripMenuItem.Click += new System.EventHandler(this.MenuItemClicked);
+            // 
+            // toolStripSeparator7
+            // 
+            this.toolStripSeparator7.Name = "toolStripSeparator7";
+            this.toolStripSeparator7.Size = new System.Drawing.Size(252, 6);
+            // 
+            // toolStripSeparator8
+            // 
+            this.toolStripSeparator8.Name = "toolStripSeparator8";
+            this.toolStripSeparator8.Size = new System.Drawing.Size(252, 6);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(994, 636);
+            this.ClientSize = new System.Drawing.Size(884, 561);
             this.Controls.Add(this.splErrorList);
             this.Controls.Add(this.pnlErrorList);
             this.Controls.Add(this.tabWindows);
@@ -629,6 +668,7 @@
             this.Controls.Add(this.sspMain);
             this.IsMdiContainer = true;
             this.MainMenuStrip = this.mnsMain;
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SketchIt";
@@ -711,5 +751,9 @@
         private System.Windows.Forms.ToolStripMenuItem mnuDownloadLatest;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripMenuItem mnuSetScreenSaver;
+        private System.Windows.Forms.ToolStripMenuItem openProjectToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
+        private System.Windows.Forms.ToolStripMenuItem saveAllToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
     }
 }

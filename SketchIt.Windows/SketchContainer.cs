@@ -1,5 +1,6 @@
 ﻿using SketchIt.Api;
 using SketchIt.Api.Interfaces;
+using SketchIt.Windows.Renderers;
 using System;
 using System.Reflection;
 using System.Windows.Forms;
@@ -12,6 +13,8 @@ namespace SketchIt.Windows
         private delegate object GenericInvocationHandler(string method, params object[] args);
         private Drawing.Size _screenSize;
         private bool _paintRequested = false;
+        private int _mouseX;
+        private int _mouseY;
 
         public SketchContainer()
         {
@@ -25,12 +28,17 @@ namespace SketchIt.Windows
 
             BackColor = Drawing.Color.FromArgb(100, 100, 100);
             Size = new Drawing.Size(200, 200);
+
+            Sketch.DefaultRendererType = typeof(GdiPlusRenderer);
         }
 
         public void Zoom(float factor)
         {
-            Sketch.Zoom = factor;
-            Scale(new Drawing.SizeF(factor, factor));
+            if (Sketch != null)
+            {
+                Sketch.Zoom = factor;
+                Scale(new Drawing.SizeF(factor, factor));
+            }
         }
 
         public Sketch Sketch
@@ -55,18 +63,38 @@ namespace SketchIt.Windows
             return (IntPtr)InvokeMethod("Handle");
         }
 
+        public float Scale
+        {
+            get
+            {
+                return this.Width / (float)Sketch.Width;
+            }
+        }
+
+        public int PreviousMouseX
+        {
+            get { return _mouseX; }
+        }
+
+        public int PreviousMouseY
+        {
+            get { return _mouseY; }
+        }
+
         public int MouseX
         {
             get
             {
                 if (InvokeRequired)
                 {
-                    return (int)(((System.Drawing.Point)InvokeMethod("PointToClient", MousePosition)).X / Sketch.Zoom);
+                    _mouseX = (int)(((System.Drawing.Point)InvokeMethod("PointToClient", MousePosition)).X / Scale);
                 }
                 else
                 {
-                    return (int)(PointToClient(MousePosition).X / Sketch.Zoom);
+                    _mouseX = (int)(PointToClient(MousePosition).X / Scale);
                 }
+
+                return _mouseX;
             }
         }
 
@@ -76,12 +104,14 @@ namespace SketchIt.Windows
             {
                 if (InvokeRequired)
                 {
-                    return (int)(((System.Drawing.Point)InvokeMethod("PointToClient", MousePosition)).Y / Sketch.Zoom);
+                    _mouseY = (int)(((System.Drawing.Point)InvokeMethod("PointToClient", MousePosition)).Y / Scale);
                 }
                 else
                 {
-                    return (int)(PointToClient(MousePosition).Y / Sketch.Zoom);
+                    _mouseY = (int)(PointToClient(MousePosition).Y / Scale);
                 }
+
+                return _mouseY;
             }
         }
 
@@ -201,7 +231,19 @@ namespace SketchIt.Windows
 
         public void UpdateSize()
         {
-            Size = new Drawing.Size(Sketch.Width, Sketch.Height);
+            if (InvokeRequired)
+            {
+                Invoke(new MethodInvoker(
+                    delegate
+                    {
+                        Size = new Drawing.Size(Sketch.Width, Sketch.Height);
+                    }
+                ));
+            }
+            else
+            {
+                Size = new Drawing.Size(Sketch.Width, Sketch.Height);
+            }
         }
 
         void ISketchContainer.Update()
@@ -222,6 +264,23 @@ namespace SketchIt.Windows
         }
 
         public void FullScreenRequested(bool stretch, int screenIndex)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new MethodInvoker(
+                    delegate
+                    {
+                        HandleFullScreenRequested(stretch, screenIndex);
+                    }
+                ));
+            }
+            else
+            {
+                HandleFullScreenRequested(stretch, screenIndex);
+            }
+        }
+
+        private void HandleFullScreenRequested(bool stretch, int screenIndex)
         {
             Screen screen = screenIndex <= 0 ? Screen.FromControl(this) : Screen.AllScreens[screenIndex - 1];
 
@@ -250,14 +309,14 @@ namespace SketchIt.Windows
 
         public IntPtr WindowHandle
         {
-            get { return Handle; }
+            get { return GetHandle(); }
         }
 
-        public void RendererChanging(RendererType rendererType)
+        public void RendererChanging(Type rendererType)
         {
         }
 
-        public void RendererChanged(RendererType rendererType)
+        public void RendererChanged(Type rendererType)
         {
         }
     }

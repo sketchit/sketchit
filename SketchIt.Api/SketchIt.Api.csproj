@@ -35,16 +35,14 @@
     <DocumentationFile>..\..\..\SketchIt\SketchIt.Api.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SharpGL, Version=2.4.0.0, Culture=neutral, PublicKeyToken=27fc851303210b27, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpGL.2.4.0.0\lib\net40\SharpGL.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpGL.SceneGraph, Version=2.4.0.0, Culture=neutral, PublicKeyToken=27fc851303210b27, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpGL.2.4.0.0\lib\net40\SharpGL.SceneGraph.dll</HintPath>
+    <Reference Include="Svg, Version=2.4.2.26702, Culture=neutral, PublicKeyToken=12a0bac221edeae2, processorArchitecture=MSIL">
+      <HintPath>..\packages\Svg.2.4.2\lib\Svg.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -66,9 +64,7 @@
     <Compile Include="Point.cs" />
     <Compile Include="Rectangle.cs" />
     <Compile Include="Renderers\RendererBase.cs" />
-    <Compile Include="Renderers\GdiPlusRenderer.cs" />
     <Compile Include="Interfaces\IStyle.cs" />
-    <Compile Include="Renderers\SharpGLRenderer.cs" />
     <Compile Include="Internal\PerlinNoise2.cs" />
     <Compile Include="Internal\RandomExtensions.cs" />
     <Compile Include="Sketch.IApplet.cs" />

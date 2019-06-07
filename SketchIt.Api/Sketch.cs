@@ -38,6 +38,12 @@ namespace SketchIt.Api
             }
         }
 
+        public static Type DefaultRendererType
+        {
+            get;
+            set;
+        }
+
         public Graphics Graphics { get; private set; }
         public Canvas OutputLayer { get; private set; }
         public Canvas CurrentLayer { get; private set; }
@@ -52,6 +58,8 @@ namespace SketchIt.Api
         public bool IsStatic { get; private set; } = false;
         public int InstanceId { get; private set; } = _instanceCounter = _instanceCounter + 1;
 
+        private object _threadListLocker = new object();
+        private List<Threading.Thread> _threadList = new List<Threading.Thread>();
         private Stack<object> _consoleStack = new Stack<object>();
         private Timer _consoleTimer;
         private List<Canvas> _layers = null;
@@ -65,6 +73,7 @@ namespace SketchIt.Api
         private Stopwatch _frameRateStopWatch = new Stopwatch();
         private int _updateInterval = 1;
         private bool _stopped = false;
+        private bool _redrawing = false;
         private bool _multiLayer = false;
         private MethodInfo _methodSetup;
         private MethodInfo _methodDraw;
@@ -156,13 +165,58 @@ namespace SketchIt.Api
                     Loop();
                 }
             }
+
+            //Threading.ParameterizedThreadStart start = new Threading.ParameterizedThreadStart(StartSketch);
+            //Threading.Thread thread = new Threading.Thread(start);
+            //thread.Start(new object[] { applet, canvas, retries });
         }
+
+        //private void StartSketch(object args)
+        //{
+        //    object[] parameters = (object[])args;
+        //    IApplet applet = parameters[0] as IApplet;
+        //    ISketchContainer canvas = parameters[1] as ISketchContainer;
+        //    int retries = (int)parameters[2];
+
+        //    using (ThreadLocker locker = ThreadLocker.Lock())
+        //    {
+        //        if (!locker.IsLocked)
+        //        {
+        //            if (retries < 5)
+        //            {
+        //                StartSketch(new object[] { applet, canvas, retries + 1 });
+        //                return;
+        //            }
+
+        //            throw new Exception("Unable to start the sketch. Lock not available. Please retry the operation.");
+        //        }
+
+        //        _applet = applet;
+        //        _applet.SetSketch(this);
+
+        //        Container = canvas;
+        //        Container.Sketch = this;
+        //        CurrentLayer = new Canvas(this, Width, Height);
+        //        OutputLayer = CurrentLayer;
+        //        Initialize();
+
+        //        if (_methodSetup != null)
+        //        {
+        //            InvokeSetup();
+        //        }
+
+        //        if (_methodDraw != null && !_stopped)
+        //        {
+        //            Loop();
+        //        }
+        //    }
+        //}
 
         private void Initialize()
         {
             _drawInterval = 1000 / _frameRate;
             _startTime = DateTime.Now;
-            _drawTimer = new Timer(2);
+            _drawTimer = new Timer(5);
             _drawTimer.Elapsed += DrawTimerElapsed;
             _consoleTimer = new Timer(50);
             _consoleTimer.Elapsed += UpdateConsole;
@@ -188,7 +242,7 @@ namespace SketchIt.Api
             }
         }
 
-        public void SetRenderer(RendererType rendererType)
+        public void SetRenderer(Type rendererType)
         {
             Container.RendererChanging(rendererType);
             OutputLayer.SetRenderer(rendererType);
@@ -226,11 +280,8 @@ namespace SketchIt.Api
             _layers = new List<Canvas>();
             _layers.Add(new Canvas(this, Width, Height));
 
-            RendererType rendererType = OutputLayer.RendererType;
             OutputLayer = new Canvas(this, Width, Height);
             SetLayer(0);
-            OutputLayer.RendererType = rendererType;
-            Layers[0].SetRenderer(rendererType);
         }
 
         public void SetContainer(ISketchContainer container)
@@ -243,11 +294,18 @@ namespace SketchIt.Api
             try
             {
                 Graphics = graphics;
+                InvokeDraw();
+                OutputLayer.Renderer.Flush();
+
+                /*
+                Graphics = graphics;
 
                 switch (OutputLayer.RendererType)
                 {
                     case RendererType.OpenGL:
                         InvokeDraw();
+                        OutputLayer.Renderer.Flush();
+
                         if (_multiLayer)
                         {
                             for (int i = 1; i < _layers.Count; i++)
@@ -258,27 +316,40 @@ namespace SketchIt.Api
                         break;
 
                     default:
-                        //using (ThreadLocker locker = ThreadLocker.Lock())
+                        InvokeDraw();
+                        OutputLayer.Renderer.Flush();
+
+                        if (_multiLayer)
                         {
-                            //if (locker.IsLocked)
+                            for (int i = 1; i < _layers.Count; i++)
                             {
-                                //if (!_paintRequested) return;
-
-                                //_paintRequested = false;
-
-                                if (_zoom == 1 && size.IsEmpty)
-                                {
-                                    Graphics.DrawImageUnscaled(OutputLayer.Bitmap, 0, 0);
-                                }
-                                else
-                                {
-                                    Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-                                    Graphics.DrawImage(OutputLayer.Bitmap, size.IsEmpty ? Graphics.ClipBounds : new RectangleF(new PointF(), size));
-                                }
+                                graphics.DrawImage(_layers[i].Bitmap, _layers[i].Location.X, _layers[i].Location.Y);
                             }
                         }
                         break;
+
+                        ////using (ThreadLocker locker = ThreadLocker.Lock())
+                        //{
+                        //    //if (locker.IsLocked)
+                        //    {
+                        //        //if (!_paintRequested) return;
+
+                        //        //_paintRequested = false;
+
+                        //        if (_zoom == 1 && size.IsEmpty)
+                        //        {
+                        //            Graphics.DrawImageUnscaled(OutputLayer.Bitmap, 0, 0);
+                        //        }
+                        //        else
+                        //        {
+                        //            Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                        //            Graphics.DrawImage(OutputLayer.Bitmap, size.IsEmpty ? Graphics.ClipBounds : new RectangleF(new PointF(), size));
+                        //        }
+                        //    }
+                        //}
+                        break;
                 }
+                */
             }
             catch (Exception ex)
             {
@@ -286,6 +357,7 @@ namespace SketchIt.Api
             }
             finally
             {
+                Graphics = null;
                 CanvasUpdated();
             }
         }
@@ -295,24 +367,39 @@ namespace SketchIt.Api
             HandleDraw();
         }
 
-        private void HandleDraw(bool redraw = false)
+        private void HandleDraw()
         {
             using (ThreadLocker locker = ThreadLocker.Lock())
             {
                 if (!locker.IsLocked) return;
                 if (IsDrawing) return;
                 if (Container == null) return;
-                if (_stopped) return;
+                if (_stopped && !_redrawing) return;
 
+                if (FrameRate <= _frameRate || _redrawing)
+                {
+                    Container.Update();
+                }
+
+                return;
+
+                /*
                 //if (DateTime.Now.Subtract(_lastDrawnTime).TotalMilliseconds >= _drawInterval)
-                if (FrameRate <= _frameRate || redraw)
+                if (FrameRate <= _frameRate || _redrawing)
                 {
                     switch (OutputLayer.RendererType)
                     {
                         case RendererType.OpenGL:
-                            //Threading.ThreadStart threadStart = new Threading.ThreadStart(Canvas.Update);
-                            //Threading.Thread thread = new Threading.Thread(threadStart);
-                            //thread.Start();
+                            //for (int i = 0; i < _updateInterval - 1; i++)
+                            //{
+                            //    if (!redraw && (!IsLooping || _stopped))
+                            //    {
+                            //        break;
+                            //    }
+
+                            //    InvokeDraw(redraw);
+                            //}
+
                             Container.Update();
                             break;
 
@@ -322,12 +409,12 @@ namespace SketchIt.Api
 
                             for (int i = 0; i < _updateInterval - 1; i++)
                             {
-                                if (!redraw && (!IsLooping || _stopped))
+                                if (!_redrawing && (!IsLooping || _stopped))
                                 {
                                     break;
                                 }
 
-                                InvokeDraw(redraw);
+                                InvokeDraw();
                             }
 
                             //if (_multiLayer)
@@ -335,9 +422,9 @@ namespace SketchIt.Api
                             //    OutputLayer.IRenderer.Clear();
                             //}
 
-                            if (redraw || (IsLooping && !_stopped))
+                            if (_redrawing || (IsLooping && !_stopped))
                             {
-                                InvokeDraw(redraw);
+                                InvokeDraw();
 
                                 if (_multiLayer)
                                 {
@@ -358,6 +445,7 @@ namespace SketchIt.Api
 
                     //IsDrawing = false;
                 }
+                */
             }
         }
 
@@ -379,9 +467,9 @@ namespace SketchIt.Api
             IsDrawing = false;
         }
 
-        private void InvokeDraw(bool redraw = false)
+        private void InvokeDraw()
         {
-            if (_stopped && !redraw) return;
+            if (_stopped && !_redrawing) return;
 
             if (_methodDraw != null)
             {
@@ -399,7 +487,16 @@ namespace SketchIt.Api
 
                 try
                 {
-                    _methodDraw.Invoke(_applet, null);
+                    for (int i = 0; i < _updateInterval; i++)
+                    {
+                        if (i > 0)
+                        {
+                            CurrentLayer.Renderer.ResetMatrix();
+                        }
+
+                        _methodDraw.Invoke(_applet, null);
+                        LoopCount++;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -408,8 +505,6 @@ namespace SketchIt.Api
                 }
                 finally
                 {
-                    LoopCount++;
-
                     if (_multiLayer)
                     {
                         foreach (Canvas layer in _layers)
@@ -421,6 +516,8 @@ namespace SketchIt.Api
                     {
                         CurrentLayer.Renderer.EndDraw();
                     }
+
+                    _redrawing = false;
                 }
             }
         }
@@ -541,14 +638,14 @@ namespace SketchIt.Api
                 {
                     try
                     {
-                        if (IsStatic)
+                        //if (IsStatic)
                         {
                             CurrentLayer.Renderer.BeginDraw();
                         }
 
                         _methodSetup.Invoke(_applet, null);
 
-                        if (IsStatic)
+                        //if (IsStatic)
                         {
                             CurrentLayer.Renderer.EndDraw();
                         }
@@ -656,6 +753,11 @@ namespace SketchIt.Api
             Height = (int)height;
             CurrentLayer.SetSize(width, height);
             Container.UpdateSize();
+        }
+
+        public void SetAngleMode(AngleMode mode)
+        {
+            Functions.AngleMode = mode;
         }
 
         public bool IsLooping
@@ -819,6 +921,15 @@ namespace SketchIt.Api
 
         public void Exit()
         {
+            foreach (Threading.Thread thread in _threadList)
+            {
+                if (thread.IsAlive)
+                {
+                    Console.WriteLine(string.Format("Aborting thread {0}", thread.ManagedThreadId));
+                    thread.Abort();
+                }
+            }
+
             OnExit(new EventArgs());
         }
 
@@ -891,16 +1002,45 @@ namespace SketchIt.Api
 
         public void Redraw()
         {
-            HandleDraw(true);
+            _redrawing = true;
+            HandleDraw();
         }
 
         public void RunThread(string methodName, params object[] args)
         {
-            MethodInfo mi = _applet.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
-            Threading.ThreadStart threadStart = new Threading.ThreadStart(delegate () { mi.Invoke(_applet, args); });
-            Threading.Thread thread = new Threading.Thread(threadStart);
+            ClearDeadThreads();
 
-            thread.Start();
+            lock (_threadListLocker)
+            {
+                MethodInfo mi = _applet.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
+                Threading.ThreadStart threadStart = new Threading.ThreadStart(delegate () { mi.Invoke(_applet, args); });
+                Threading.Thread thread = new Threading.Thread(threadStart);
+
+                _threadList.Add(thread);
+
+                thread.Start();
+            }
+        }
+
+        private void ClearDeadThreads()
+        {
+            lock (_threadListLocker)
+            {
+                List<Threading.Thread> deadThreads = new List<Threading.Thread>();
+
+                foreach (Threading.Thread thread in _threadList)
+                {
+                    if (!thread.IsAlive)
+                    {
+                        deadThreads.Add(thread);
+                    }
+                }
+
+                foreach (Threading.Thread deadThread in deadThreads)
+                {
+                    _threadList.Remove(deadThread);
+                }
+            }
         }
     }
 }

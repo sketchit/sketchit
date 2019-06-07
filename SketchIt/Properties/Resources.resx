@@ -195,6 +195,7 @@ namespace SketchIt {
             {
                 f.Close();
             };
+
             SketchIt.Windows.Application.Set(sketch);
             sketch.Start(app, container);
 

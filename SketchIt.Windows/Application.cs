@@ -1,6 +1,8 @@
 ﻿using SketchIt.Api;
 using SketchIt.Api.Interfaces;
 using SketchIt.Api.Static;
+using SketchIt.Windows.Renderers;
+using System;
 
 namespace SketchIt.Windows
 {
@@ -11,6 +13,12 @@ namespace SketchIt.Windows
     /// </summary>
     public static class Application
     {
+        public static Type GDIPLUS = typeof(GdiPlusRenderer);
+        public static Type OPENGL = typeof(SharpGLRenderer);
+
+        internal static Style Style { get => Sketch.Style; }
+        internal static Sketch Sketch { get; private set; }
+
         /// <summary>
         /// For internal use. Sets an instance of a <see cref="SketchIt.Api.Sketch"/> to <see cref="Application"/>.
         /// </summary>
@@ -30,26 +38,16 @@ namespace SketchIt.Windows
         public static Canvas CreateCanvas(int width, int height) => new Canvas(Sketch, width, height);
 
         /// <summary>
-        /// For internal use. Shorthand for <see cref="Sketch.Style"/>.
-        /// </summary>
-        public static Style Style { get => Sketch.Style; }
-
-        /// <summary>
         /// The current layer of the sketch. When multi-layer mode is not used, the <see cref="CurrentLayer"/> and <see cref="OutputLayer"/> properties
         /// references the same object instance.
         /// </summary>
         public static Canvas CurrentLayer { get => Sketch.CurrentLayer; }
 
         /// <summary>
-        /// For internal use. The instance to the <see cref="Api.Sketch"/> object.
-        /// </summary>
-        public static Sketch Sketch { get; private set; }
-
-        /// <summary>
         /// Sets the renderer to use. The default renderer is GDIPLUS.
         /// </summary>
         /// <param name="renderer">GDIPLUS or OPENGL</param>
-        public static void SetRenderer(int renderer) => Sketch.SetRenderer((RendererType)renderer);
+        public static void SetRenderer(Type renderer) => Sketch.SetRenderer(renderer);
 
         /// <summary>
         /// Initializes the sketch in multi-layer mode.
@@ -92,9 +90,17 @@ namespace SketchIt.Windows
         /// <summary>
         /// Sets the size of the sketch. In multi-layer mode, the active layer's size is set.
         /// </summary>
+        /// <example>
+        /// <code>
+        /// //Sets the canvas size to 800 (width) by 400 (height) pixels.
+        /// SetFullScreen(800, 400);
+        /// </code>
+        /// </example>
         /// <param name="width">The width of the canvas, in pixels.</param>
         /// <param name="height">The height of the canvas, in pixels.</param>
         public static void SetSize(int width, int height) { CurrentLayer.SetSize(width, height); }
+
+        public static void SetAngleMode(int mode) { Sketch.SetAngleMode((AngleMode)mode); }
 
         /// <summary>
         /// Sets the location of the output canvas window.
@@ -208,6 +214,19 @@ namespace SketchIt.Windows
         public static void DrawCurve(params Point[] points) { CurrentLayer.Renderer.DrawCurve(new CurveParameters(points)); }
 
         /// <summary>
+        /// Draws a circle at the canvas drawing origin (0, 0) with the specified diameter.
+        /// </summary>
+        /// <param name="diameter">The diameter of the circle.</param>
+        public static void DrawEllipse(float diameter) { CurrentLayer.Renderer.DrawEllipse(diameter); }
+
+        /// <summary>
+        /// Draws an ellipse at the canvas drawing origin (0, 0) with the specified width and height.
+        /// </summary>
+        /// <param name="width">The width of the ellipse.</param>
+        /// <param name="height">The height of the ellipse.</param>
+        public static void DrawEllipse(float width, float height) { CurrentLayer.Renderer.DrawEllipse(width, height); }
+
+        /// <summary>
         /// Draws a circle to the canvas.
         /// </summary>
         /// <param name="x">The x-coordinate of the rectangle that defines the circle.</param>
@@ -224,7 +243,21 @@ namespace SketchIt.Windows
         /// <param name="height">The height of the rectangle that defines the ellipse.</param>
         public static void DrawEllipse(float x, float y, float width, float height) { CurrentLayer.Renderer.DrawEllipse(new EllipseParameters(x, y, width, height)); }
 
+        public static void DrawCircle(float x, float y, float diameter) { CurrentLayer.Renderer.DrawCircle(x, y, diameter); }
         public static void DrawQuad(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) { CurrentLayer.Renderer.DrawQuad(new QuadParameters(x1, y1, x2, y2, x3, y3, x4, y4)); }
+
+        /// <summary>
+        /// Draws a square at the canvas drawing origin (0, 0) with a height and width based on the specified size.
+        /// </summary>
+        /// <param name="size">The size (width and height) of the square.</param>
+        public static void DrawRectangle(float size) { CurrentLayer.Renderer.DrawRectangle(size); }
+
+        /// <summary>
+        /// Draws a rectangle at the canvas drawing origin (0, 0) with the specified width and height.
+        /// </summary>
+        /// <param name="width">The width of the rectangle.</param>
+        /// <param name="height">The height of the rectangle.</param>
+        public static void DrawRectangle(float width, float height) { CurrentLayer.Renderer.DrawRectangle(width, height); }
 
         /// <summary>
         /// Draws a square to the canvas.
@@ -249,6 +282,13 @@ namespace SketchIt.Windows
         /// <param name="rectangle">The <see cref="Rectangle"/> to be drawn.</param>
         public static void DrawRectangle(Rectangle rectangle) { DrawRectangle(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height); }
 
+        public static void DrawSquare(float x, float y, float size) { CurrentLayer.Renderer.DrawSquare(x, y, size); }
+
+        /// <summary>
+        /// Draws a point at the canvas drawing origin (0, 0) using the current stroke weight.
+        /// </summary>
+        public static void DrawPoint() { CurrentLayer.Renderer.DrawPoint(); }
+
         /// <summary>
         /// Draws a point using the current stroke weight to the canvas.
         /// </summary>
@@ -263,16 +303,32 @@ namespace SketchIt.Windows
         /// <param name="x">The x-coordinate of the shape's origin.</param>
         /// <param name="y">The y-coordinate of the shape's origin.</param>
         public static void DrawShape(Shape shape, float x, float y) { CurrentLayer.Renderer.DrawShape(new ShapeParameters(shape, x, y)); }
+        public static void DrawShape(Shape shape) { CurrentLayer.Renderer.DrawShape(new ShapeParameters(shape, 0, 0)); }
+        /// <summary>
+        /// Draws a line to the canvas.
+        /// </summary>
+        /// <param name="x1">The starting x-coordinate of the line.</param>
+        /// <param name="y1">The starting y-coordinate of the line.</param>
+        /// <param name="x2">The ending x-coordinate of the line.</param>
+        /// <param name="y2">The ending y-coordinate of the line.</param>
+        public static void DrawLine(float x1, float y1, float x2, float y2) { CurrentLayer.Renderer.DrawLine(new LineParameters(x1, y1, x2, y2)); }
 
         /// <summary>
         /// Draws a line to the canvas.
         /// </summary>
-        /// <param name="x1"></param>
-        /// <param name="y1"></param>
-        /// <param name="x2"></param>
-        /// <param name="y2"></param>
-        public static void DrawLine(float x1, float y1, float x2, float y2) { CurrentLayer.Renderer.DrawLine(new LineParameters(x1, y1, x2, y2)); }
+        /// <param name="x1">The starting x-coordinate of the line.</param>
+        /// <param name="y1">The starting y-coordinate of the line.</param>
+        /// <param name="z1">The starting z-coordinate of the line.</param>
+        /// <param name="x2">The ending x-coordinate of the line.</param>
+        /// <param name="y2">The ending y-coordinate of the line.</param>
+        /// <param name="z2">The ending z-coordinate of the line.</param>
         public static void DrawLine(float x1, float y1, float z1, float x2, float y2, float z2) { CurrentLayer.Renderer.DrawLine(new LineParameters(x1, y1, z1, x2, y2, z2)); }
+
+        /// <summary>
+        /// Draws the specified image to the canvas at the drawing origin (0, 0).
+        /// </summary>
+        /// <param name="image">A reference to the image.</param>
+        public static void DrawImage(IImage image) { CurrentLayer.Renderer.DrawImage(image); }
 
         /// <summary>
         /// Draws an image to the canvas.
@@ -291,6 +347,12 @@ namespace SketchIt.Windows
         /// <param name="width"></param>
         /// <param name="height"></param>
         public static void DrawImage(IImage image, float x, float y, float width, float height) { CurrentLayer.Renderer.DrawImage(new ImageParameters(image, x, y, width, height)); }
+
+        /// <summary>
+        /// Draws the specified text to the canvase at the drawing origin (0, 0).
+        /// </summary>
+        /// <param name="text"></param>
+        public static void DrawText(object text) { CurrentLayer.Renderer.DrawText(text); }
 
         /// <summary>
         /// Draws the specified text to the canvas using the current font (see <see cref="SetFont(string, float)"/>).
@@ -315,12 +377,29 @@ namespace SketchIt.Windows
 
         //public static Point[][] GetTextPoints(string text) { return Sketch.GetTextPoints(text); }
 
+        /// <summary>
+        /// Sets the font used for drawing text to the canvas.
+        /// </summary>
+        /// <param name="name">The name of the font.</param>
+        /// <param name="size">The size of the font.</param>
         public static void SetFont(string name, float size) => Style.SetFont(name, size);
+
+        /// <summary>
+        /// Sets the font used for drawing text to the canvas.
+        /// </summary>
+        /// <param name="name">The name of the font.</param>
+        /// <param name="size">The size of the font.</param>
+        /// <param name="bold">True if the font should be bold, false otherwise.</param>
+        /// <param name="italic">True if the font should be italic, false otherwise.</param>
         public static void SetFont(string name, float size, bool bold, bool italic) { Style.SetFont(new FontParameters(name, size, bold, italic)); }
 
         public static void Clear() { CurrentLayer.Renderer.Clear(); }
         public static void Redraw() { Sketch.Redraw(); }
 
+        /// <summary>
+        /// Draws the background with the specified image.
+        /// </summary>
+        /// <param name="image">A reference to the image.</param>
         public static void DrawBackground(IImage image) { CurrentLayer.Renderer.DrawBackground(new BackgroundParameters(image)); }
 
         /// <summary>
@@ -354,6 +433,44 @@ namespace SketchIt.Windows
         public static void DrawBackground(float v1, float v2, float v3, float alpha) { CurrentLayer.Renderer.DrawBackground(new BackgroundParameters(Style.GetColor(v1, v2, v3, alpha))); }
         public static void DrawBackground(Color color, float alpha) { CurrentLayer.Renderer.DrawBackground(new BackgroundParameters(new Color(color, alpha))); }
         public static void DrawBackground(Color color) { CurrentLayer.Renderer.DrawBackground(new BackgroundParameters(color)); }
+        public static void DrawBackground() { CurrentLayer.Renderer.DrawBackground(); }
+        /// <summary>
+        /// Sets the background to the specified image.
+        /// </summary>
+        /// <param name="image">A reference to the image.</param>
+        public static void SetBackground(IImage image) { CurrentLayer.Renderer.SetBackground(new BackgroundParameters(image)); }
+
+        /// <summary>
+        /// Sets the background to the specified grayscale color.
+        /// </summary>
+        /// <param name="gray">The grayscale value (0 to 255 inclusive).</param>
+        public static void SetBackground(float gray) { CurrentLayer.Renderer.SetBackground(new BackgroundParameters(Style.GetColor(gray))); }
+
+        /// <summary>
+        /// Sets the background to the specified grayscale color and alpha value.
+        /// </summary>
+        /// <param name="gray">The grayscale value (0 to 255 inclusive).</param>
+        /// <param name="alpha">The alpha value (0 to 255 inclusive).</param>
+        public static void SetBackground(float gray, float alpha) { CurrentLayer.Renderer.SetBackground(new BackgroundParameters(Style.GetColor(gray, alpha))); }
+
+        /// <summary>
+        /// Sets the background to the specified color values (either RGB or HSB).
+        /// </summary>
+        /// <param name="v1">Value 1. Red for RGB, Hue for HSB.</param>
+        /// <param name="v2">Value 2. Green for RGB, Saturation for HSB.</param>
+        /// <param name="v3">Value 3. Blue for RGB, Brightness for HSB.</param>
+        public static void SetBackground(float v1, float v2, float v3) { CurrentLayer.Renderer.SetBackground(new BackgroundParameters(Style.GetColor(v1, v2, v3))); }
+
+        /// <summary>
+        /// Sets the background to the specified color values (either RGB or HSB).
+        /// </summary>
+        /// <param name="v1">Value 1. Red for RGB, Hue for HSB.</param>
+        /// <param name="v2">Value 2. Green for RGB, Saturation for HSB.</param>
+        /// <param name="v3">Value 3. Blue for RGB, Brightness for HSB.</param>
+        /// <param name="alpha">Alpha value.</param>
+        public static void SetBackground(float v1, float v2, float v3, float alpha) { CurrentLayer.Renderer.SetBackground(new BackgroundParameters(Style.GetColor(v1, v2, v3, alpha))); }
+        public static void SetBackground(Color color, float alpha) { CurrentLayer.Renderer.SetBackground(new BackgroundParameters(new Color(color, alpha))); }
+        public static void SetBackground(Color color) { CurrentLayer.Renderer.SetBackground(new BackgroundParameters(color)); }
 
         public static void SetFill(float gray) { Style.SetFill(new FillParameters(Style.GetColor(gray))); }
         public static void SetFill(float gray, float alpha) { Style.SetFill(new FillParameters(Style.GetColor(gray, alpha))); }
@@ -364,8 +481,23 @@ namespace SketchIt.Windows
         public static void SetFill(IImage image) { Style.SetFill(new FillParameters(image)); }
         public static void SetNoFill() { Style.SetNoFill(); }
 
+        /// <summary>
+        /// Sets the stroke weight used to draw lines or points.
+        /// </summary>
+        /// <param name="weight">The stroke weight in pixels.</param>
         public static void SetStrokeWeight(float weight) { Style.SetStrokeWeight(weight); }
+
+        /// <summary>
+        /// Sets a grayscale color for the stroke.
+        /// </summary>
+        /// <param name="gray">A value between 0 (black) and 255 (white).</param>
         public static void SetStroke(float gray) { Style.SetStroke(new StrokeParameters(Style.GetColor(gray))); }
+
+        /// <summary>
+        /// Sets a grayscale color for the stroke.
+        /// </summary>
+        /// <param name="gray">A value between 0 (black) and 255 (white).</param>
+        /// <param name="alpha">The alpha value (default between 0 and 255) for the color.</param>
         public static void SetStroke(float gray, float alpha) { Style.SetStroke(new StrokeParameters(Style.GetColor(gray, alpha))); }
         public static void SetStroke(float r, float g, float b) { Style.SetStroke(new StrokeParameters(Style.GetColor(r, g, b))); }
         public static void SetStroke(float r, float g, float b, float alpha) { Style.SetStroke(new StrokeParameters(Style.GetColor(r, g, b, alpha))); }
@@ -421,6 +553,16 @@ namespace SketchIt.Windows
         public static int MouseY { get { return Sketch.Container.MouseY; } }
 
         /// <summary>
+        /// Returns the previous x-coordinate of the mouse location, relative to the canvas.
+        /// </summary>
+        public static int PreviousMouseX { get { return Sketch.Container.PreviousMouseX; } }
+
+        /// <summary>
+        /// Returns the current y-coordinate of the mouse location, relative to the canvas.
+        /// </summary>
+        public static int PreviousMouseY { get { return Sketch.Container.PreviousMouseY; } }
+
+        /// <summary>
         /// Returns true if a mouse buttons is pressed.
         /// </summary>
         public static bool IsMousePressed { get { return Sketch.Container.IsMousePressed; } }
@@ -443,6 +585,11 @@ namespace SketchIt.Windows
         public static void RotateX(float angle) { CurrentLayer.Renderer.RotateX(angle); }
         public static void RotateY(float angle) { CurrentLayer.Renderer.RotateY(angle); }
         public static void RotateZ(float angle) { CurrentLayer.Renderer.RotateZ(angle); }
+
+        /// <summary>
+        /// Sets the number of times the Draw() loop should be called before updating the display.
+        /// </summary>
+        /// <param name="interval">The number of times the Draw() should be called for each frame update.</param>
         public static void SetUpdateInterval(int interval) { Sketch.SetUpdateInterval(interval); }
 
         /// <summary>
@@ -468,7 +615,9 @@ namespace SketchIt.Windows
         public static void BeginShape() { CurrentLayer.Renderer.BeginShape(ShapeKind.Polygon); }
         public static void BeginShape(int kind) { CurrentLayer.Renderer.BeginShape((ShapeKind)kind); }
         public static void Vertex(float x, float y) { CurrentLayer.Renderer.Vertex(x, y, 0, 0, 0); }
+        public static void Vertex(float x, float y, float z) { CurrentLayer.Renderer.Vertex(x, y, z, 0, 0); }
         public static void Vertex(float x, float y, float u, float v) { CurrentLayer.Renderer.Vertex(x, y, 0, u, v); }
+        public static void Vertex(float x, float y, float z, float u, float v) { CurrentLayer.Renderer.Vertex(x, y, z, u, v); }
         public static void Texture(IImage image) { CurrentLayer.Renderer.Texture(image); }
         public static void EndShape() { CurrentLayer.Renderer.EndShape(EndShapeMode.Open); }
         public static void EndShape(int mode) { CurrentLayer.Renderer.EndShape((EndShapeMode)mode); }
@@ -497,5 +646,6 @@ namespace SketchIt.Windows
 
         public static void SetPerspective() { CurrentLayer.Renderer.SetPerspective(); }
         public static void SetOrtho() { CurrentLayer.Renderer.SetOrtho(); }
+        public static void SetLights() { CurrentLayer.Renderer.SetLights(); }
     }
 }

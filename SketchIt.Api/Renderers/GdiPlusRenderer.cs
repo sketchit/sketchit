@@ -73,6 +73,19 @@ namespace SketchIt.Api.Renderers
             _drawingSurface = null;
         }
 
+        public override void Flush()
+        {
+            if (Canvas.Sketch.Zoom == 1 /*&& size.IsEmpty*/)
+            {
+                Canvas.Sketch.Graphics.DrawImageUnscaled(Canvas.Sketch.OutputLayer.Bitmap, 0, 0);
+            }
+            else
+            {
+                Canvas.Sketch.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                Canvas.Sketch.Graphics.DrawImage(Canvas.Sketch.OutputLayer.Bitmap, /*size.IsEmpty ?*/ Canvas.Sketch.Graphics.ClipBounds /*: new RectangleF(new PointF(), size)*/);
+            }
+        }
+
         private void SetGraphicsOptions()
         {
             _drawingSurface.SmoothingMode = SmoothingMode.HighQuality;
@@ -437,8 +450,14 @@ namespace SketchIt.Api.Renderers
                 }
                 else
                 {
-                    //dch.Graphics.FillRectangle(parms.ToBrush(), 0, 0, _graphics.Width, _graphics.Height);
-                    dch.DrawingSurface.Clear(parms.Color.ToSystemColor());
+                    if (parms.Color.Alpha != 255)
+                    {
+                        dch.DrawingSurface.FillRectangle(parms.ToBrush(), 0, 0, Canvas.Width, Canvas.Height);
+                    }
+                    else
+                    {
+                        dch.DrawingSurface.Clear(parms.Color.ToSystemColor());
+                    }
                 }
             }
         }
@@ -477,7 +496,7 @@ namespace SketchIt.Api.Renderers
         {
             using (DeviceContextHandler dch = GetDeviceContextHandler())
             {
-                dch.DrawingSurface.RotateTransform(angle);
+                dch.DrawingSurface.RotateTransform(Functions.AngleMode == AngleMode.Degrees ? angle : Functions.Degrees(angle));
             }
         }
 

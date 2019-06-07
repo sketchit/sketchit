@@ -59,6 +59,10 @@ namespace SketchIt.Api.Renderers
         private float defCameraNear;
         private float defCameraFar;
         private float defCameraAspect;
+        private bool _drawing = false;
+        private bool _drawn = false;
+        private bool _perspective = true;
+        private int _matrixStack = 0;
 
         public IRenderer IRenderer => this;
         public SharpGLRenderer(Canvas canvas)
@@ -77,17 +81,20 @@ namespace SketchIt.Api.Renderers
             _openGL = new OpenGL();
             _openGL.Create(OpenGLVersion.OpenGL2_1, RenderContextType.FBO, Canvas.Width, Canvas.Height, 32, Canvas.Sketch.Container.WindowHandle);
 
-            _openGL.ShadeModel(OpenGL.GL_SMOOTH);
             _openGL.ClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-            _openGL.ClearDepth(1.0f);
+
             _openGL.Enable(OpenGL.GL_DEPTH_TEST);
             _openGL.DepthFunc(OpenGL.GL_LEQUAL);
-            _openGL.Hint(OpenGL.GL_PERSPECTIVE_CORRECTION_HINT, OpenGL.GL_NICEST);
+            _openGL.ClearDepth(1.0f);
+
+            //_openGL.Hint(OpenGL.GL_PERSPECTIVE_CORRECTION_HINT, OpenGL.GL_NICEST);
 
             _openGL.Enable(OpenGL.GL_BLEND);
-            _openGL.BlendFunc(OpenGL.GL_SRC_ALPHA, OpenGL.GL_ONE_MINUS_SRC_ALPHA);
+            _openGL.BlendFunc(BlendingSourceFactor.SourceAlpha, BlendingDestinationFactor.OneMinusSourceAlpha);
+
             _openGL.Enable(OpenGL.GL_LINE_SMOOTH);
             _openGL.Hint(OpenGL.GL_LINE_SMOOTH_HINT, OpenGL.GL_NICEST);
+            _openGL.ShadeModel(OpenGL.GL_SMOOTH);
 
             defCameraFOV = 60f;
             defCameraX = Canvas.Width / 2f;
@@ -97,17 +104,19 @@ namespace SketchIt.Api.Renderers
             defCameraFar = defCameraZ * 10f;
             defCameraAspect = (float)Canvas.Width / (float)Canvas.Height;
 
+            _openGL.Enable(OpenGL.GL_COLOR_MATERIAL);
+            _openGL.ColorMaterial(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_AMBIENT_AND_DIFFUSE);
+            _openGL.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_SPECULAR, new float[] { 1, 1, 1, 1 });
+            _openGL.Material(OpenGL.GL_FRONT_AND_BACK, OpenGL.GL_EMISSION, new float[] { 0, 0, 0, 1 });
+            _openGL.Material(OpenGL.GL_FRONT, OpenGL.GL_SHININESS, 128);
+
+            _openGL.Light(LightName.Light0, LightParameter.Ambient, new float[] { 0.2f, 0.2f, 0.2f, 1.0f });
+            _openGL.Light(LightName.Light0, LightParameter.Diffuse, new float[] { 0.8f, 0.8f, 0.8f, 1.0f });
+            _openGL.Light(LightName.Light0, LightParameter.Specular, new float[] { 0.5f, 0.5f, 0.5f, 1.0f });
+            _openGL.Light(LightName.Light0, LightParameter.Position, new float[] { -1.5f, 1.0f, 4.0f, 1 });
+            _openGL.Light(LightName.Light0, LightParameter.SpotCutoff, 180.0f);
+
             SetPerspective();
-        }
-
-        private float MapX(float x)
-        {
-            return Functions.Map(x, 0, Canvas.Width, -1, 1);
-        }
-
-        private float MapY(float y)
-        {
-            return Functions.Map(y, 0, Canvas.Height, 1, -1);
         }
 
         private void SetFill()
@@ -139,17 +148,52 @@ namespace SketchIt.Api.Renderers
 
         public override void BeginDraw()
         {
+            if (_drawing)
+            {
+                throw new Exception();
+            }
+
+            _drawn = false;
+            _drawing = true;
             _openGL.MakeCurrent();
             ResetMatrix();
             _openGL.PushMatrix();
-            _openGL.Scale(Canvas.Sketch.Zoom, Canvas.Sketch.Zoom, Canvas.Sketch.Zoom);
+
+            if (_perspective)
+            {
+                //SetPerspective();
+            }
+            else
+            {
+                //SetOrtho();
+            }
         }
 
         public override void DrawBackground(BackgroundParameters parms)
         {
             float[] rgba = parms.Color.GetNormalizedValues();
             _openGL.ClearColor(rgba[0], rgba[1], rgba[2], rgba[3]);
-            _openGL.Clear(OpenGL.GL_COLOR_BUFFER_BIT);
+
+            if (rgba[3] != 1)
+            {
+                StrokeParameters stroke = Canvas.StrokeParameters;
+                FillParameters fill = Canvas.FillParameters;
+                bool strokeDisabled = stroke.Disabled;
+                bool fillDisabled = fill.Disabled;
+
+                Canvas.SetNoStroke();
+                Canvas.SetFill(parms.Color);
+                DrawRectangle(0, 0, Canvas.Width, Canvas.Height);
+
+                stroke.Disabled = strokeDisabled;
+                fill.Disabled = fillDisabled;
+                Canvas.SetStroke(stroke);
+                Canvas.SetFill(fill);
+            }
+            else
+            {
+                _openGL.Clear(OpenGL.GL_COLOR_BUFFER_BIT);
+            }
         }
 
         public override void DrawShape(ShapeParameters parms)
@@ -172,66 +216,155 @@ namespace SketchIt.Api.Renderers
             PopMatrix();
         }
 
+        public override void DrawImage(ImageParameters parms)
+        {
+            //uint[] gtexture = new uint[1];
+            //System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, parms.Image.Width, parms.Image.Height);
+            //System.Drawing.Imaging.BitmapData gbitmapdata = parms.Image.Bitmap.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            //parms.Image.Bitmap.UnlockBits(gbitmapdata);
+            //_openGL.GenTextures(1, gtexture);
+            //_openGL.BindTexture(OpenGL.GL_TEXTURE_2D, gtexture[0]);
+            //_openGL.TexImage2D(OpenGL.GL_TEXTURE_2D, 0, (int)OpenGL.GL_RGB8, parms.Image.Bitmap.Width, parms.Image.Bitmap.Height, 0, OpenGL.GL_BGR_EXT, OpenGL.GL_UNSIGNED_BYTE, gbitmapdata.Scan0);
+
+            //uint[] array = new uint[] { OpenGL.GL_NEAREST };
+            //_openGL.TexParameterI(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MIN_FILTER, array);
+            //_openGL.TexParameterI(OpenGL.GL_TEXTURE_2D, OpenGL.GL_TEXTURE_MAG_FILTER, array);
+
+            //_openGL.Enable(OpenGL.GL_TEXTURE_2D);
+            //_openGL.BindTexture(OpenGL.GL_TEXTURE_2D, gtexture[0]);
+            //_openGL.Color(1.0f, 1.0f, 1.0f, 0.1f); //Must have, weirdness!
+            //_openGL.Begin(OpenGL.GL_QUADS);
+            //_openGL.TexCoord(1.0f, 1.0f);
+            //_openGL.Vertex(parms.Width ?? parms.Image.Width, parms.Height ?? parms.Image.Height, 1.0f);
+            //_openGL.TexCoord(0.0f, 1.0f);
+            //_openGL.Vertex(0.0f, parms.Height ?? parms.Image.Height, 1.0f);
+            //_openGL.TexCoord(0.0f, 0.0f);
+            //_openGL.Vertex(0.0f, 0.0f, 1.0f);
+            //_openGL.TexCoord(1.0f, 0.0f);
+            //_openGL.Vertex(parms.Width ?? parms.Image.Width, 0.0f, 1.0f);
+            //_openGL.End();
+            //_openGL.Disable(OpenGL.GL_TEXTURE_2D);
+        }
+
         public override void EndDraw()
         {
-            if (Canvas.Sketch.Graphics != null)
+            //if (Canvas.Sketch.Graphics != null)
+            //{
+            //    IntPtr dc = Canvas.Sketch.Graphics.GetHdc();
+            //    _openGL.Blit(dc);
+            //    Canvas.Sketch.Graphics.ReleaseHdc(dc);
+            //}
+
+            _openGL.PopMatrix();
+            _drawing = false;
+            _drawn = true;
+        }
+
+        public override void Flush()
+        {
+            if (_drawn && Canvas.Sketch.Graphics != null)
             {
                 IntPtr dc = Canvas.Sketch.Graphics.GetHdc();
+                _openGL.Flush();
                 _openGL.Blit(dc);
                 Canvas.Sketch.Graphics.ReleaseHdc(dc);
             }
-
-            _openGL.PopMatrix();
         }
 
         public override void PopMatrix()
         {
             _openGL.PopMatrix();
+            _matrixStack--;
         }
 
         public override void PushMatrix()
         {
             _openGL.PushMatrix();
+            _matrixStack++;
         }
 
         public override void ResetMatrix()
         {
-            _openGL.Clear(OpenGL.GL_DEPTH_BUFFER_BIT);
+            while (_matrixStack > 0)
+            {
+                PopMatrix();
+            }
+
+            if (_perspective)
+            {
+                SetPerspective();
+            }
+            else
+            {
+                SetOrtho();
+            }
         }
 
         public override void SetPerspective()
         {
+            _perspective = true;
             _openGL.Clear(OpenGL.GL_DEPTH_BUFFER_BIT);
-
-            _openGL.MatrixMode(MatrixMode.Modelview);
-            _openGL.LoadIdentity();
 
             _openGL.MatrixMode(MatrixMode.Projection);
             _openGL.LoadIdentity();
             _openGL.Perspective(defCameraFOV, defCameraAspect, defCameraNear, defCameraFar);
-            _openGL.Scale(Canvas.Sketch.Zoom, Canvas.Sketch.Zoom, Canvas.Sketch.Zoom);
 
             Translate(-defCameraX, -defCameraY, -defCameraZ);
+
+            _openGL.Scale(Canvas.Sketch.Zoom, Canvas.Sketch.Zoom, Canvas.Sketch.Zoom);
         }
 
         public override void SetOrtho()
         {
+            _perspective = false;
             _openGL.Clear(OpenGL.GL_DEPTH_BUFFER_BIT);
 
-            _openGL.MatrixMode(MatrixMode.Projection);
-            _openGL.LoadIdentity();
+            //_openGL.MatrixMode(MatrixMode.Projection);
+            //_openGL.LoadIdentity();
 
             _openGL.MatrixMode(MatrixMode.Modelview);
             _openGL.LoadIdentity();
             _openGL.Ortho(-Canvas.Width / 2, Canvas.Width / 2, -Canvas.Height / 2, Canvas.Height / 2, defCameraNear, defCameraFar);
-            _openGL.Scale(Canvas.Sketch.Zoom, Canvas.Sketch.Zoom, Canvas.Sketch.Zoom);
 
             Translate(-Canvas.Width / 2, -Canvas.Height / 2, -defCameraZ);
+
+            _openGL.Scale(Canvas.Sketch.Zoom, Canvas.Sketch.Zoom, Canvas.Sketch.Zoom);
+        }
+
+        public override void SetLights()
+        {
+            //_openGL.MatrixMode(MatrixMode.Modelview);
+            //_openGL.LoadIdentity();
+            //_openGL.Light(LightName.Light0, LightParameter.Position, new float[] { -1.5f, 1.0f, -4.0f, -1 });
+
+            //_openGL.Light(LightName.Light0, LightParameter.Ambient, new float[] { 0.2f, 0.2f, 0.2f, 1.0f });
+            //_openGL.Light(LightName.Light0, LightParameter.Diffuse, new float[] { 0.8f, 0.8f, 0.8f, 1.0f });
+            //_openGL.Light(LightName.Light0, LightParameter.Specular, new float[] { 0.5f, 0.5f, 0.5f, 1.0f });
+            //_openGL.Light(LightName.Light0, LightParameter.Position, new float[] { -1.5f, 1.0f, 4.0f, 1 });
+            //_openGL.Light(LightName.Light0, LightParameter.SpotCutoff, 180.0f);
+            _openGL.Enable(OpenGL.GL_LIGHTING);
+            _openGL.Enable(OpenGL.GL_LIGHT0);
+
+            //if (_perspective)
+            //{
+            //    SetPerspective();
+            //}
+            //else
+            //{
+            //    SetOrtho();
+            //}
         }
 
         private void Rotate(float angleX, float angleY, float angleZ)
         {
-            _openGL.Rotate(angleX, angleY, angleZ);
+            if (Functions.AngleMode == AngleMode.Degrees)
+            {
+                _openGL.Rotate(angleX, angleY, angleZ);
+            }
+            else
+            {
+                _openGL.Rotate(Functions.Degrees(angleX), Functions.Degrees(angleY), Functions.Degrees(angleZ));
+            }
         }
 
         public override void Rotate(float angle)

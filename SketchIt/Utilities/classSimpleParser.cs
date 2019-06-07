@@ -62,7 +62,11 @@ namespace SketchIt.Utilities
             KnownProperties = " ";
             KnownTypes = " ";
 
-            foreach (Type type in typeof(Api.Sketch).Assembly.GetTypes())
+            List<Type> types = new List<Type>();
+            types.AddRange(typeof(Api.Sketch).Assembly.GetTypes());
+            types.Add(typeof(SketchIt.Windows.Application));
+
+            foreach (Type type in types)
             {
                 if (KnownTypes.IndexOf(" " + type.Name + " ") == -1)
                 {

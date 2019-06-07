@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>SketchIt.Api</RootNamespace>
+    <Product>SketchIt</Product>
+    <Company>SketchIt</Company>
+    <Authors>Ian Kloppers</Authors>
+    <Copyright>© 2019 Ian Kloppers</Copyright>
+    <Version>0.2.1905.501</Version>
+    <PackageProjectUrl>http://www.sketchit.org</PackageProjectUrl>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\..\..\SketchIt\</OutputPath>
+    <DocumentationFile>..\..\..\SketchIt\SketchIt.Api.NetStandard.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
+  </ItemGroup>
+
+</Project>

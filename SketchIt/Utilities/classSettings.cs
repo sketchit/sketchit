@@ -90,6 +90,11 @@ namespace SketchIt.Utilities
 
         private void Save()
         {
+            if (_saving)
+            {
+                return;
+            }
+
             try
             {
                 _saving = true;

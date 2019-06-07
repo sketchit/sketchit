@@ -1,6 +1,7 @@
 ﻿//https://stackoverflow.com/questions/24701703/c-sharp-faster-alternatives-to-setpixel-and-getpixel-for-bitmaps-for-windows-f
 
 using SketchIt.Api.Interfaces;
+using Svg;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -24,38 +25,76 @@ namespace SketchIt.Api
         public static Image FromSource(string source) => FromSource(source, null, null);
         public static Image FromSource(string source, int? width, int? height)
         {
-            Uri uri = new Uri(source);
-            string localPath = "";
-
-            switch (uri.HostNameType)
+            try
             {
-                case UriHostNameType.Basic:
-                    localPath = uri.LocalPath;
-                    break;
+                Uri uri = new Uri(source);
+                string localPath = "";
 
-                default:
-                    WebClient web = new WebClient();
-                    localPath = Path.GetTempFileName();
-                    web.DownloadFile(uri, localPath);
-                    break;
-            }
-
-            if (File.Exists(localPath))
-            {
-                Bitmap image = System.Drawing.Image.FromFile(localPath) as Bitmap;
-                Image result = new Image(width ?? image.Width, height ?? image.Height);
-
-                using (Graphics g = Graphics.FromImage(result.Bitmap))
-                //if (result.Width != image.Width || result.Height != image.Height)
+                switch (uri.HostNameType)
                 {
-                    g.DrawImage(image, 0, 0, result.Width, result.Height);
-                }
-                //else
-                //{
-                //    g.DrawImageUnscaled(image, 0, 0);
-                //}
+                    case UriHostNameType.Basic:
+                        localPath = uri.LocalPath;
+                        break;
 
-                return result;
+                    default:
+                        WebClient web = new WebClient();
+                        localPath = Path.GetTempFileName();
+                        web.DownloadFile(uri, localPath);
+                        break;
+                }
+
+                if (File.Exists(localPath))
+                {
+                    Bitmap image;
+
+                    switch (Path.GetExtension(localPath).ToLower())
+                    {
+                        case ".svg":
+                            SvgDocument svg = SvgDocument.Open(localPath);
+                            image = svg.Draw(width ?? (int)svg.Width.Value, height ?? (int)svg.Height.Value);
+
+                            //using (TextReader tr = new StreamReader(localPath))
+                            //{
+                            //    var t = new NGraphics.SvgReader(tr);
+                            //    var i = NGraphics.Platforms.Current.CreateImageCanvas(t.Graphic.Size);
+                            //    t.Graphic.Draw(i);
+
+                            //    using (MemoryStream ms = new MemoryStream())
+                            //    {
+                            //        i.GetImage().SaveAsPng(ms);
+                            //        image = new Bitmap(Bitmap.FromStream(ms));
+                            //    }
+                            //}
+                            break;
+
+                        default:
+                            image = System.Drawing.Image.FromFile(localPath) as Bitmap;
+                            break;
+                    }
+
+                    if (image != null)
+                    {
+                        Image result = new Image(width ?? image.Width, height ?? image.Height);
+
+                        using (Graphics g = Graphics.FromImage(result.Bitmap))
+                        //if (result.Width != image.Width || result.Height != image.Height)
+                        {
+                            g.DrawImage(image, 0, 0, result.Width, result.Height);
+                        }
+                        //else
+                        //{
+                        //    g.DrawImageUnscaled(image, 0, 0);
+                        //}
+
+                        image.Dispose();
+
+                        return result;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return null;
@@ -63,14 +102,21 @@ namespace SketchIt.Api
 
         public static Image FromSource(IImage image)
         {
-            Image result = new Image(image.Width, image.Height);
-
-            using (Graphics g = Graphics.FromImage(result.Bitmap))
+            if (image == null)
             {
-                g.DrawImageUnscaled(image.Bitmap, 0, 0);
+                return null;
             }
+            else
+            {
+                Image result = new Image(image.Width, image.Height);
 
-            return result;
+                using (Graphics g = Graphics.FromImage(result.Bitmap))
+                {
+                    g.DrawImageUnscaled(image.Bitmap, 0, 0);
+                }
+
+                return result;
+            }
         }
 
         public object Clone() { return GetImage(); }

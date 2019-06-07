@@ -46,6 +46,9 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Common, Version=4.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Drawing.Common.4.5.1\lib\net461\System.Drawing.Common.dll</HintPath>
+    </Reference>
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -70,9 +73,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SketchIt.Api\SketchIt.Api.csproj">
-      <Project>{abbf752c-958b-4059-a3df-690fba4a4457}</Project>
-      <Name>SketchIt.Api</Name>
+    <ProjectReference Include="..\SketchIt.Api.NetStandard\SketchIt.Api.NetStandard.csproj">
+      <Project>{d568790a-a35a-418b-a98d-5d9e1688e71d}</Project>
+      <Name>SketchIt.Api.NetStandard</Name>
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
