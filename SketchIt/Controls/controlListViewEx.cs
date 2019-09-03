@@ -71,7 +71,7 @@ namespace SketchIt.Controls
                 }
             }
 
-            resizeHeader.Width = Width - width;
+            resizeHeader.Width = Width - width - (BorderStyle == BorderStyle.None ? 0 : 4);
 
             _updateingColumnWidths = false;
         }

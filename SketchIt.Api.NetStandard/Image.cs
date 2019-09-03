@@ -1,7 +1,6 @@
 ﻿//https://stackoverflow.com/questions/24701703/c-sharp-faster-alternatives-to-setpixel-and-getpixel-for-bitmaps-for-windows-f
 
 using SketchIt.Api.Interfaces;
-//using Svg;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -22,8 +21,22 @@ namespace SketchIt.Api
 
         protected GCHandle BitsHandle { get; private set; }
 
-        public static Image FromSource(string source) => FromSource(source, null, null);
-        public static Image FromSource(string source, int? width, int? height)
+        public static Image FromStream(Stream stream, int? width = null, int? height = null)
+        {
+            using (System.Drawing.Image image = Bitmap.FromStream(stream))
+            {
+                Image result = new Image(width ?? image.Width, height ?? image.Height);
+
+                using (Graphics graphics = Graphics.FromImage(result.Bitmap))
+                {
+                    graphics.DrawImage(image, 0, 0, result.Width, result.Height);
+                }
+
+                return result;
+            }
+        }
+
+        public static Image FromSource(string source, int? width = null, int? height = null)
         {
             try
             {

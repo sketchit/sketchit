@@ -120,12 +120,12 @@ namespace SketchIt.Properties {
         ///        [DllImport(&quot;kernel32.dll&quot;, SetLastError = true)]
         ///        [return: MarshalAs(UnmanagedType.Bool)]
         ///        static extern bool AllocConsole();
+        ///        static bool isPreview = false;
+        ///        static IntPtr previewHandle = IntPtr.Zero;
         ///
         ///        [STAThread]
-        ///        static void Main() { 
-        ///	        AllocConsole();
-        ///
-        ///            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_Assembly [rest of string was truncated]&quot;;.
+        ///        static void Main(string[] args) { 
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string AppStartup {
             get {

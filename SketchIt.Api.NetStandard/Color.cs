@@ -6,6 +6,7 @@ namespace SketchIt.Api
     public struct Color : ICloneable
     {
         public static readonly Color Empty = new Color();
+        public static readonly Color Transparent = new Color(0, 0, 0, 255);
 
         public Color(Color color, float alpha)
             : this(color.Value1, color.Value2, color.Value3, alpha)

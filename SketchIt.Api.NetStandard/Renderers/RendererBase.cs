@@ -45,7 +45,7 @@ namespace SketchIt.Api.Renderers
         /// <summary>
         /// Clears the background of the canvas.
         /// </summary>
-        public virtual void Clear() => NotImplemented();
+        public virtual void Clear() => DrawBackground(Color.Transparent);
 
         public virtual void DrawArc(ArcParameters parms)
         {

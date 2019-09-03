@@ -3,6 +3,7 @@ using SketchIt.Api.Interfaces;
 using SketchIt.Api.Static;
 using SketchIt.Windows.Renderers;
 using System;
+using System.IO;
 
 namespace SketchIt.Windows
 {
@@ -48,6 +49,8 @@ namespace SketchIt.Windows
         /// </summary>
         /// <param name="renderer">GDIPLUS or OPENGL</param>
         public static void SetRenderer(Type renderer) => Sketch.SetRenderer(renderer);
+
+        public static void SetRenderPreference(int preference) => Sketch.SetRenderPreference((RenderPreference)preference);
 
         /// <summary>
         /// Initializes the sketch in multi-layer mode.
@@ -157,10 +160,17 @@ namespace SketchIt.Windows
         /// </summary>
         public static float FrameRate { get { return Sketch.FrameRate; } }
 
+        public static float FrameRateError { get { return Sketch.FrameRateError; } }
+
         /// <summary>
         /// Returns the number of frames drawn since the start of the sketch.
         /// </summary>
         public static int FrameCount { get { return Sketch.FrameCount; } }
+
+        /// <summary>
+        /// Returns the number of milliseconds since the last frame was drawn.
+        /// </summary>
+        public static float FrameElapsedTime { get { return Sketch.FrameElapsedTime; } }
 
         /// <summary>
         /// Indicates if the sketch is currently looping.
@@ -382,7 +392,8 @@ namespace SketchIt.Windows
         /// </summary>
         /// <param name="name">The name of the font.</param>
         /// <param name="size">The size of the font.</param>
-        public static void SetFont(string name, float size) => Style.SetFont(name, size);
+        //public static void SetFont(string name, float size) => Style.SetFont(name, size);
+        public static void SetFont(string name, float size) => Style.SetFont(Sketch.GetFont(name, size));
 
         /// <summary>
         /// Sets the font used for drawing text to the canvas.
@@ -391,7 +402,8 @@ namespace SketchIt.Windows
         /// <param name="size">The size of the font.</param>
         /// <param name="bold">True if the font should be bold, false otherwise.</param>
         /// <param name="italic">True if the font should be italic, false otherwise.</param>
-        public static void SetFont(string name, float size, bool bold, bool italic) { Style.SetFont(new FontParameters(name, size, bold, italic)); }
+        //public static void SetFont(string name, float size, bool bold, bool italic) { Style.SetFont(new FontParameters(name, size, bold, italic)); }
+        public static void SetFont(string name, float size, bool bold, bool italic) { Style.SetFont(Sketch.GetFont(name, size, bold, italic)); }
 
         public static void Clear() { CurrentLayer.Renderer.Clear(); }
         public static void Redraw() { Sketch.Redraw(); }
@@ -479,6 +491,7 @@ namespace SketchIt.Windows
         public static void SetFill(Color color, float alpha) { Style.SetFill(new FillParameters(new Color(color, alpha))); }
         public static void SetFill(Color color) { Style.SetFill(new FillParameters(color)); }
         public static void SetFill(IImage image) { Style.SetFill(new FillParameters(image)); }
+        public static void SetFill(FillParameters parms) { Style.SetFill(parms); }
         public static void SetNoFill() { Style.SetNoFill(); }
 
         /// <summary>
@@ -504,6 +517,7 @@ namespace SketchIt.Windows
         public static void SetStroke(Color color, float alpha) { Style.SetStroke(new StrokeParameters(new Color(color, alpha))); }
         public static void SetStroke(Color color) { Style.SetStroke(new StrokeParameters(color)); }
         public static void SetStroke(IImage image) { Style.SetStroke(new StrokeParameters(image)); }
+        public static void SetStroke(StrokeParameters parms) { Style.SetStroke(parms); }
         public static void SetNoStroke() { Style.SetNoStroke(); }
 
         public static void SetTint(float gray) { Style.SetTint(new TintParameters(Style.GetColor(gray))); }
@@ -634,6 +648,8 @@ namespace SketchIt.Windows
         /// <param name="values">An array of values to print.</param>
         public static void PrintLine(params object[] values) => Sketch.PrintLine(values);
 
+        public static string ReadLine() => Console.ReadLine();
+
         /// <summary>
         /// Runs the specified method in a seperate thread. Manipulating the canvas from a seperate thread is not recommended.
         /// </summary>
@@ -647,5 +663,14 @@ namespace SketchIt.Windows
         public static void SetPerspective() { CurrentLayer.Renderer.SetPerspective(); }
         public static void SetOrtho() { CurrentLayer.Renderer.SetOrtho(); }
         public static void SetLights() { CurrentLayer.Renderer.SetLights(); }
+
+        public static string GetWindowCaption() => Sketch.GetWindowCaption();
+        public static void SetWindowCaption(object caption) => Sketch.SetWindowCaption(caption);
+
+        public static Stream GetResourceStream(string fileName) => Sketch.GetResourceStream(fileName);
+        public static byte[] GetResourceByteArray(string fileName) => Sketch.GetResourceByteArray(fileName);
+
+        public static int GetScreenWidth(int screenIndex = 0) => Sketch.GetScreenWidth(screenIndex);
+        public static int GetScreenHeight(int screenIndex = 0) => Sketch.GetScreenHeight(screenIndex);
     }
 }

@@ -103,10 +103,14 @@ namespace SketchIt.Api.Static
             return (float)Math.Pow(x, y);
         }
 
+        public static int Sign(float number)
+        {
+            return Math.Sign(number);
+        }
+
         public static float Map(float number, float start1, float stop1, float start2, float stop2)
         {
-            float norm = Normalize(number, start1, stop1);
-            return start2 + (norm * (stop2 - start2));
+            return start2 + (number - start1) * (stop2 - start2) / (stop1 - start1);
         }
 
         public static float Constrain(float number, float limit1, float limit2)
@@ -164,17 +168,38 @@ namespace SketchIt.Api.Static
 
         public static int Int(object value)
         {
-            return Convert.ToInt32(value);
+            try
+            {
+                return Convert.ToInt32(value);
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
         public static float Float(object value)
         {
-            return Convert.ToSingle(value);
+            try
+            {
+                return Convert.ToSingle(value);
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
         public static double Double(object value)
         {
-            return Convert.ToDouble(value);
+            try
+            {
+                return Convert.ToDouble(value);
+            }
+            catch
+            {
+                return 0;
+            }
         }
 
         public static string String(object value)

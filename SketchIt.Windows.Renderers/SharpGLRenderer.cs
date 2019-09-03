@@ -147,7 +147,10 @@ namespace SketchIt.Windows.Renderers
                 _openGL.Vertex(v.X, v.Y * -1, v.Z);
             }
 
-            //_openGL.Vertex(shape.Vertices[0].X, shape.Vertices[0].Y * -1, shape.Vertices[0].Z);
+            if (shape.EndMode == EndShapeMode.Close)
+            {
+                _openGL.Vertex(shape.Vertices[0].X, shape.Vertices[0].Y * -1, shape.Vertices[0].Z);
+            }
 
             _openGL.End();
         }
@@ -365,11 +368,11 @@ namespace SketchIt.Windows.Renderers
         {
             if (Functions.AngleMode == AngleMode.Degrees)
             {
-                _openGL.Rotate(angleX, angleY, angleZ);
+                _openGL.Rotate(angleX, angleY, -angleZ);
             }
             else
             {
-                _openGL.Rotate(Functions.Degrees(angleX), Functions.Degrees(angleY), Functions.Degrees(angleZ));
+                _openGL.Rotate(Functions.Degrees(angleX), Functions.Degrees(angleY), Functions.Degrees(-angleZ));
             }
         }
 

@@ -25,6 +25,7 @@ namespace SketchIt
         private Sketch _sketch;
         private string _projectFile = null;
         private Status _startStatus;
+        private List<ProjectFileReference> _resourceFiles;
 
         public MainForm()
         {
@@ -70,6 +71,11 @@ namespace SketchIt
             return form;
         }
 
+        public ProjectFileReference[] GetResourceFiles()
+        {
+            return _resourceFiles.ToArray();
+        }
+
         public SimpleParser Parser
         {
             get;
@@ -86,6 +92,14 @@ namespace SketchIt
         {
             get;
             private set;
+        }
+
+        public string ProjectName
+        {
+            get
+            {
+                return _projectFile == null ? null : Path.GetFileNameWithoutExtension(new FileInfo(_projectFile).Name);
+            }
         }
 
         public void AddExistingFile()
@@ -143,6 +157,7 @@ namespace SketchIt
                 AddNewSourceFile();
             }
 
+            _resourceFiles = new List<ProjectFileReference>();
             _projectFile = null;
 
             Text = "SketchIt - New Project";
@@ -218,6 +233,10 @@ namespace SketchIt
             {
                 switch (((ToolStripItem)sender).Tag.ToString())
                 {
+                    case "resources":
+                        ResourcesForm.ShowResources(_resourceFiles);
+                        break;
+
                     case "restart-preview":
                         RestartPreview();
                         break;
@@ -569,6 +588,11 @@ namespace SketchIt
                     _sketch.Start(applet, ctlCanvas);
 
                     ctlCanvas_SizeChanged(null, null);
+
+                    //ProcessStartInfo startInfo = new ProcessStartInfo(BackgroundCompiler.Output.Location, $"preview={ctlCanvas.Handle}");
+                    //Process.Start(startInfo);
+
+                    ctlCanvas.Show();
                     lblPreparingPreview.Hide();
                 }
                 else if (IsLivePreviewEnabled && _sketch != null)
@@ -641,28 +665,19 @@ namespace SketchIt
 
         internal void CodeChanged(EditorForm editor)
         {
-            if (_previewTimer != null)
-            {
-                _previewTimer.Stop();
-            }
-
-            if (_previewTimer != null)
-            {
-                _previewTimer.Start();
-            }
-
-            //Program.Parser.Parse();
+            _previewTimer?.Stop();
+            _previewTimer?.Start();
         }
 
         private void BuildPreview()
         {
             BackgroundWorker worker = new BackgroundWorker();
-            worker.DoWork += Worker_DoWork;
-            worker.RunWorkerCompleted += Worker_RunWorkerCompleted;
+            worker.DoWork += BuildPreviewStart;
+            worker.RunWorkerCompleted += BuildPreviewCompleted;
             worker.RunWorkerAsync();
         }
 
-        private void Worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void BuildPreviewCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             BeginInvoke(new MethodInvoker(UpdateLivePreview));
         }
@@ -670,7 +685,7 @@ namespace SketchIt
         private void PreviewTimerElapsed(object sender, EventArgs e)
         {
             _previewTimer.Stop();
-            Program.Parser.Parse();
+            Program.Parser.Parse(!IsLivePreviewEnabled);
             BuildPreview();
         }
 
@@ -702,7 +717,7 @@ namespace SketchIt
             }
         }
 
-        private void Worker_DoWork(object sender, DoWorkEventArgs e)
+        private void BuildPreviewStart(object sender, DoWorkEventArgs e)
         {
             BackgroundCompiler.Compile();
         }
@@ -732,6 +747,7 @@ namespace SketchIt
             {
                 CloseLivePreview();
                 Stop();
+                Program.Parser.Parse(false);
 
                 if (Compiler.Compile())
                 {
@@ -814,6 +830,7 @@ namespace SketchIt
                         string json = reader.ReadToEnd();
                         project = JsonConvert.DeserializeObject(json, typeof(Project)) as Project;
                         _projectFile = dialog.FileName;
+                        _resourceFiles = new List<ProjectFileReference>();
                     }
 
                     Directory.SetCurrentDirectory(new FileInfo(_projectFile).DirectoryName);
@@ -831,8 +848,15 @@ namespace SketchIt
                         }
                     }
 
+                    if (project.Resources != null)
+                    {
+                        _resourceFiles = new List<ProjectFileReference>(project.Resources);
+                    }
+
                     Text = "SketchIt - " + project.Name;
                     Directory.SetCurrentDirectory(System.Windows.Forms.Application.StartupPath);
+
+                    ResetPreviewTimer(false);
                 }
             }
         }
@@ -860,10 +884,11 @@ namespace SketchIt
                 Project proj = new Project();
                 List<ProjectFileReference> files = new List<ProjectFileReference>();
                 Uri projectUri = new Uri(_projectFile);
+                FileInfo projectFileInfo = new FileInfo(_projectFile);
 
-                proj.Name = Path.GetFileNameWithoutExtension(new FileInfo(_projectFile).Name);
+                proj.Name = Path.GetFileNameWithoutExtension(projectFileInfo.Name);
 
-                foreach (BaseForm form in System.Windows.Forms.Application.OpenForms)
+                foreach (BaseForm form in Application.OpenForms)
                 {
                     if (form == null) continue;
                     if (form.Type == WindowType.SourceFile)
@@ -881,7 +906,23 @@ namespace SketchIt
                     }
                 }
 
+                foreach (ProjectFileReference resource in _resourceFiles)
+                {
+                    FileInfo fileInfo = new FileInfo(resource.Name);
+                    Uri fileUri = new Uri(fileInfo.FullName);
+
+                    if (projectFileInfo.DirectoryName.StartsWith(fileInfo.DirectoryName))
+                    {
+                        resource.Name = Uri.UnescapeDataString(projectUri.MakeRelativeUri(fileUri).ToString());
+                    }
+                    else
+                    {
+                        resource.Name = fileUri.AbsolutePath;
+                    }
+                }
+
                 proj.Files = files.ToArray();
+                proj.Resources = _resourceFiles.ToArray();
 
                 string json = JsonConvert.SerializeObject(proj, Formatting.Indented);
 
@@ -891,7 +932,7 @@ namespace SketchIt
                 }
 
                 Text = "SketchIt - " + proj.Name;
-                Directory.SetCurrentDirectory(System.Windows.Forms.Application.StartupPath);
+                Directory.SetCurrentDirectory(Application.StartupPath);
             }
         }
 
@@ -973,6 +1014,7 @@ namespace SketchIt
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            _sketch?.NoLoop();
             _updateTimer.Stop();
             _previewTimer.Stop();
         }
@@ -988,10 +1030,12 @@ namespace SketchIt
     {
         public string Name { get; set; }
         public ProjectFileReference[] Files { get; set; }
+        public ProjectFileReference[] Resources { get; set; }
     }
 
     public class ProjectFileReference
     {
         public string Name { get; set; }
     }
+
 }

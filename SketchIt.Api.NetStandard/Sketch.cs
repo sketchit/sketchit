@@ -7,7 +7,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Text;
+using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Timers;
 using Threading = System.Threading;
@@ -49,7 +52,7 @@ namespace SketchIt.Api
         public Canvas CurrentLayer { get; private set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
-        public DateTime StartTime { get; private set; }
+        public DateTime StartTime { get => _startTime; }
         public Canvas[] Layers { get => _layers.ToArray(); }
         public int KeyCode { get; private set; }
         public char KeyChar { get; private set; }
@@ -64,7 +67,9 @@ namespace SketchIt.Api
         private Timer _consoleTimer;
         private List<Canvas> _layers = null;
         private IApplet _applet;
-        private Timer _drawTimer;
+        //private Timer _drawTimer;
+        private MicroTimer _drawTimer;
+        private MicroStopwatch _elapsedStopwatch;
         private DateTime _lastDrawnTime;
         private DateTime _startTime;
         private float _frameRate = 60;
@@ -72,6 +77,8 @@ namespace SketchIt.Api
         private float _zoom = 1;
         private Stopwatch _frameRateStopWatch = new Stopwatch();
         private int _updateInterval = 1;
+        private int _frameCount = 0;
+        private int _frameRateFrameCount = 0;
         private bool _stopped = false;
         private bool _redrawing = false;
         private bool _multiLayer = false;
@@ -87,6 +94,8 @@ namespace SketchIt.Api
         private MethodInfo _methodMouseDown;
         private MethodInfo _methodMouseUp;
         private Threading.Thread _setupThread;
+        private PrivateFontCollection _privateFonts = new PrivateFontCollection();
+        private Dictionary<string, int> _privateFontsIndex = new Dictionary<string, int>();
 
         public Sketch()
             : this(200, 200)
@@ -103,6 +112,11 @@ namespace SketchIt.Api
         {
             get;
             private set;
+        }
+
+        public IApplet Applet
+        {
+            get => _applet;
         }
 
         public ISketchContainer Container
@@ -221,6 +235,7 @@ namespace SketchIt.Api
                 if (_methodSetup != null)
                 {
                     InvokeSetup();
+                    Container.Update();
                 }
 
                 if (_methodDraw != null && !_stopped)
@@ -239,8 +254,11 @@ namespace SketchIt.Api
         {
             _drawInterval = 1000 / _frameRate;
             _startTime = DateTime.Now;
-            _drawTimer = new Timer(5);
-            _drawTimer.Elapsed += DrawTimerElapsed;
+            _elapsedStopwatch = new MicroStopwatch();
+            //_drawTimer = new Timer(1);
+            //_drawTimer.Elapsed += DrawTimerElapsed;
+            _drawTimer = new MicroTimer(1000);
+            _drawTimer.MicroTimerElapsed += DrawTimerElapsed;
             _consoleTimer = new Timer(50);
             _consoleTimer.Elapsed += UpdateConsole;
             //_consoleTimer.Start();
@@ -275,6 +293,11 @@ namespace SketchIt.Api
             Container.RendererChanged(rendererType);
         }
 
+        public void SetRenderPreference(RenderPreference preference)
+        {
+            CurrentLayer.Style.RenderPreference = preference;
+        }
+
         public int AddLayer()
         {
             _layers.Add(new Canvas(this, Width, Height));
@@ -294,10 +317,28 @@ namespace SketchIt.Api
             Container.FullScreenRequested(stretch, screenIndex);
         }
 
+        public int GetScreenWidth(int screenIndex = 0)
+        {
+            return Container.GetScreenSize(screenIndex).Width;
+        }
+
+        public int GetScreenHeight(int screenIndex = 0)
+        {
+            return Container.GetScreenSize(screenIndex).Height;
+        }
+
+        public Size GetScreenSize(int screenIndex = 0)
+        {
+            return Container.GetScreenSize(screenIndex);
+        }
+
         public void CenterScreen()
         {
             Container.CenterScreen();
         }
+
+        public string GetWindowCaption() => Container.GetWindowCaption();
+        public void SetWindowCaption(object caption) => Container.SetWindowCaption(caption);
 
         public void SetMultiLayer()
         {
@@ -390,7 +431,8 @@ namespace SketchIt.Api
             }
         }
 
-        private void DrawTimerElapsed(object sender, ElapsedEventArgs e)
+        //private void DrawTimerElapsed(object sender, ElapsedEventArgs e)
+        private void DrawTimerElapsed(object sender, MicroTimerEventArgs e)
         {
             HandleDraw();
         }
@@ -405,7 +447,9 @@ namespace SketchIt.Api
                 if (_stopped && !_redrawing) return;
 
                 if (FrameRate <= _frameRate || _redrawing)
+                //if (DateTime.Now.Subtract(_lastDrawnTime).TotalMilliseconds >= _drawInterval || _redrawing)
                 {
+                    IsDrawing = true;
                     Container.Update();
                 }
 
@@ -489,12 +533,15 @@ namespace SketchIt.Api
         {
             if (IsLooping)
             {
-                FrameCount++;
+                IncrementFrameCount();
+                _lastDrawnTime = DateTime.Now;
+                _elapsedStopwatch.Restart();
             }
 
             IsDrawing = false;
         }
 
+        private bool _invokingDraw = false;
         private void InvokeDraw()
         {
             if (_stopped && !_redrawing) return;
@@ -502,6 +549,14 @@ namespace SketchIt.Api
 
             if (_methodDraw != null)
             {
+                if (_invokingDraw)
+                {
+                    NoLoop();
+                    throw new Exception("ALREADY DRAWING");
+                }
+
+                _invokingDraw = true;
+
                 if (_multiLayer)
                 {
                     foreach (Canvas layer in _layers)
@@ -547,6 +602,7 @@ namespace SketchIt.Api
                     }
 
                     _redrawing = false;
+                    _invokingDraw = false;
                 }
             }
         }
@@ -572,7 +628,6 @@ namespace SketchIt.Api
             {
                 try
                 {
-
                     _methodKeyDown.Invoke(_applet, _methodKeyDown.GetParameters().Length == 0 ? null : new object[] { e });
                 }
                 catch (Exception ex)
@@ -710,9 +765,8 @@ namespace SketchIt.Api
             {
                 if (_methodDraw != null)
                 {
-                    _drawTimer.Enabled = true;
+                    _drawTimer.Start();
                     _frameRateStopWatch.Start();
-
                     OnLoop(new EventArgs());
                 }
             }
@@ -739,7 +793,7 @@ namespace SketchIt.Api
                     {
                         if (_drawTimer != null)
                         {
-                            _drawTimer.Enabled = false;
+                            _drawTimer.Abort();
                             _frameRateStopWatch.Stop();
                         }
 
@@ -765,19 +819,37 @@ namespace SketchIt.Api
 
         public int FrameCount
         {
-            get;
-            private set;
+            get => _frameCount;
+        }
+
+        private void IncrementFrameCount()
+        {
+            _frameCount++;
+            _frameRateFrameCount++;
         }
 
         public float FrameRate
         {
             //get { return IsLooping ? FrameCount / ((float)DateTime.Now.Subtract(_loopStart).TotalMilliseconds / 1000) : 0; }
-            get { return IsLooping ? FrameCount / ((float)_frameRateStopWatch.ElapsedMilliseconds / 1000) : 0; }
+            get { return IsLooping ? _frameRateFrameCount / ((float)_frameRateStopWatch.ElapsedMilliseconds / 1000) : 0; }
+        }
+
+        public float FrameElapsedTime
+        {
+            get => _elapsedStopwatch.ElapsedMicroseconds / 1000f;
+        }
+
+        public float FrameRateError
+        {
+            get => FrameRate == 0 ? 1 : (_frameRate / FrameRate);
         }
 
         public void SetFrameRate(float rate)
         {
             _frameRate = rate;
+            _drawInterval = 1000f / _frameRate;
+            _frameRateStopWatch.Reset();
+            _frameRateFrameCount = 0;
         }
 
         public void SetUpdateInterval(int interval)
@@ -959,6 +1031,8 @@ namespace SketchIt.Api
 
         public void Exit()
         {
+            NoLoop();
+
             foreach (Threading.Thread thread in _threadList)
             {
                 if (thread.IsAlive)
@@ -1041,6 +1115,64 @@ namespace SketchIt.Api
                 Print(valueList.ToArray());
             }
             //).Invoke();
+        }
+
+        public byte[] GetResourceByteArray(string fileName)
+        {
+            using (Stream stream = GetResourceStream(fileName))
+            {
+                if (stream == null) return null;
+
+                byte[] resourceData = new byte[stream.Length];
+                stream.Read(resourceData, 0, resourceData.Length);
+                return resourceData;
+            }
+        }
+
+        public Stream GetResourceStream(string fileName)
+        {
+            return Applet.GetType().Assembly.GetManifestResourceStream(fileName);
+        }
+
+        public Font GetEmbeddedFont(string fileName, float size, FontStyle style)
+        {
+            if (!_privateFontsIndex.ContainsKey(fileName))
+            {
+                byte[] fontData = GetResourceByteArray(fileName);
+
+                if (fontData == null)
+                {
+                    return new Font(fileName, size, style);
+                }
+                else
+                {
+                    IntPtr data = Marshal.AllocCoTaskMem(fontData.Length);
+
+                    Marshal.Copy(fontData, 0, data, fontData.Length);
+                    _privateFonts.AddMemoryFont(data, fontData.Length);
+                    _privateFontsIndex.Add(fileName, _privateFonts.Families.Length - 1);
+                    Marshal.FreeCoTaskMem(data);
+                }
+            }
+
+            return new Font(_privateFonts.Families[_privateFontsIndex[fileName]], size, style);
+        }
+
+        public Font GetFont(string name, float size, bool bold = false, bool italic = false)
+        {
+            FontStyle style = FontStyle.Regular;
+
+            if (bold) style |= FontStyle.Bold;
+            if (italic) style |= FontStyle.Italic;
+
+            if (name.StartsWith("@"))
+            {
+                return GetEmbeddedFont(name.Substring(1), size, style);
+            }
+            else
+            {
+                return new Font(name, size, style);
+            }
         }
 
         public void Redraw()

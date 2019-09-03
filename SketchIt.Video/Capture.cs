@@ -74,7 +74,12 @@ namespace SketchIt.Video
                 lock (_videoCapture)
                 {
                     _videoCapture.Read(_mat);
-
+                    //CvInvoke.Rectangle(_mat, new System.Drawing.Rectangle(10, 10, 100, 100), new Emgu.CV.Structure.MCvScalar(255, 0, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias);
+                    //CvInvoke.PutText(_mat, "this is a test", new System.Drawing.Point(100, 100), Emgu.CV.CvEnum.FontFace.HersheyComplex, 2, new Emgu.CV.Structure.MCvScalar(0, 255, 0), 1, Emgu.CV.CvEnum.LineType.AntiAlias, false);
+                    //CvInvoke.Ellipse(_mat, new Emgu.CV.Structure.RotatedRect(new System.Drawing.PointF(200, 200), new System.Drawing.SizeF(100, 50), 45), new Emgu.CV.Structure.MCvScalar(0, 255, 255, .5), -1, Emgu.CV.CvEnum.LineType.Filled);
+                    //CvInvoke.Ellipse(_mat, new Emgu.CV.Structure.RotatedRect(new System.Drawing.PointF(200, 200), new System.Drawing.SizeF(100, 50), 45), new Emgu.CV.Structure.MCvScalar(0, 0, 255), 2, Emgu.CV.CvEnum.LineType.AntiAlias);
+                    //CvInvoke.Polylines(_mat, new System.Drawing.Point[] { new System.Drawing.Point(0, 0), new System.Drawing.Point(100, 40), new System.Drawing.Point(40, 200) }, true, new Emgu.CV.Structure.MCvScalar(255));
+                    
                     if (!_mat.IsEmpty)
                     {
                         _nextFrame = new System.Drawing.Bitmap(_mat.Bitmap);

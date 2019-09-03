@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
-using Image = SketchIt.Api.Image;
 using Point = SketchIt.Api.Point;
 using Rectangle = SketchIt.Api.Rectangle;
 
@@ -83,7 +82,17 @@ namespace SketchIt.Windows.Renderers
         {
             if (Canvas.Sketch.Zoom == 1 /*&& size.IsEmpty*/)
             {
-                Canvas.Sketch.Graphics.DrawImageUnscaled(Canvas.Sketch.OutputLayer.Bitmap, 0, 0);
+                Size size = Canvas.Sketch.Container.IsStretched && Canvas.Sketch.OutputLayer.Equals(Canvas) ? Canvas.Sketch.Container.Size : Size.Empty;
+
+                if (size.IsEmpty)
+                {
+                    Canvas.Sketch.Graphics.DrawImageUnscaled(Canvas.Sketch.OutputLayer.Bitmap, 0, 0);
+                }
+                else
+                {
+                    Canvas.Sketch.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                    Canvas.Sketch.Graphics.DrawImage(Canvas.Sketch.OutputLayer.Bitmap, 0, 0, size.Width, size.Height);
+                }
             }
             else
             {
@@ -94,10 +103,11 @@ namespace SketchIt.Windows.Renderers
 
         private void SetGraphicsOptions()
         {
-            _drawingSurface.SmoothingMode = SmoothingMode.HighQuality;
-            _drawingSurface.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            _drawingSurface.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            _drawingSurface.SmoothingMode = Style.RenderPreference == RenderPreference.Quality ? SmoothingMode.HighQuality : SmoothingMode.HighSpeed;
+            _drawingSurface.InterpolationMode = Style.RenderPreference == RenderPreference.Quality ? InterpolationMode.HighQualityBicubic : InterpolationMode.NearestNeighbor;
+            _drawingSurface.PixelOffsetMode = Style.RenderPreference == RenderPreference.Quality ? PixelOffsetMode.HighQuality : PixelOffsetMode.HighSpeed;
             _drawingSurface.TextRenderingHint = TextRenderingHint.AntiAlias;
+
             //_graphics.CompositingMode = CompositingMode.SourceOver;
             //_graphics.CompositingQuality = CompositingQuality.AssumeLinear;
 
@@ -272,7 +282,7 @@ namespace SketchIt.Windows.Renderers
 
                 if (!Style.FillParameters.Disabled)
                 {
-                    dch.DrawingSurface.FillEllipse(Style.FillParameters.ToBrush(), rect.X, rect.Y, rect.Width, rect.Height);
+                    dch.DrawingSurface.FillEllipse(Style.FillParameters.ToBrush(rect.SystemRectangleF), rect.X, rect.Y, rect.Width, rect.Height);
                 }
 
                 if (!Style.StrokeParameters.Disabled)
@@ -387,25 +397,15 @@ namespace SketchIt.Windows.Renderers
 
                 if (!Style.FillParameters.Disabled)
                 {
-                    dch.DrawingSurface.FillPath(Style.FillParameters.ToBrush(), path);
+                    RectangleF bounds = path.GetBounds();
+                    Brush b = Style.FillParameters.ToBrush(bounds);
+                    dch.DrawingSurface.FillPath(b, path);
+                    //dch.DrawingSurface.FillPath(Style.FillParameters.ToBrush(path.GetBounds().Size), path);
                 }
 
                 if (!Style.StrokeParameters.Disabled)
                 {
                     dch.DrawingSurface.DrawPath(Style.StrokeParameters.ToPen(), path);
-                }
-
-                if (parms.Shape.Texture != null)
-                {
-                    PointF tl = new PointF(path.PathPoints[0].X, path.PathPoints[0].Y);
-                    PointF tr = new PointF(path.PathPoints[1].X, path.PathPoints[1].Y);
-                    PointF bl = new PointF(path.PathPoints[3].X, path.PathPoints[3].Y);
-                    PointF br = new PointF(path.PathPoints[2].X, path.PathPoints[2].Y);
-
-                    using (Image texture = ((Image)parms.Shape.Texture).ToTrapezoid(tl, tr, bl, br))
-                    {
-                        dch.DrawingSurface.DrawImage(texture.Bitmap, new PointF());
-                    }
                 }
 
                 PopMatrix();
@@ -438,8 +438,9 @@ namespace SketchIt.Windows.Renderers
 
         public override void Clear()
         {
-            //_graphics.ClearPixles();
-            //return;
+            base.Clear();
+            return;
+
             using (DeviceContextHandler dch = GetDeviceContextHandler())
             {
                 dch.DrawingSurface.Clear(System.Drawing.Color.Transparent);

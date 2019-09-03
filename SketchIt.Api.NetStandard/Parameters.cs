@@ -478,6 +478,11 @@ namespace SketchIt.Api
             set;
         }
 
+        public ColorParameter()
+        {
+            Disabled = true;
+        }
+
         public ColorParameter(IImage image)
             : this(new Color())
         {
@@ -517,13 +522,17 @@ namespace SketchIt.Api
             }
         }
 
-        public Brush ToBrush()
+        public Brush ToBrush() => ToBrush(RectangleF.Empty);
+        public Brush ToBrush(RectangleF bounds)
         {
             if (_brush == null)
             {
                 if (Image != null)
                 {
-                    _brush = new TextureBrush(Image.Bitmap, new RectangleF(0, 0, Image.Width, Image.Height), Style != null && Style.TintParameters.Disabled ? new System.Drawing.Imaging.ImageAttributes() : Style.TintParameters.ImageAttributes);
+                    SizeF textureSize = bounds.IsEmpty ? new SizeF(Image.Width, Image.Height) : bounds.Size;
+                    _brush = new TextureBrush(Image.Bitmap, new RectangleF(new PointF(), textureSize), Style != null && Style.TintParameters.Disabled ? new System.Drawing.Imaging.ImageAttributes() : Style.TintParameters.ImageAttributes);
+                    ((TextureBrush)_brush).TranslateTransform(bounds.Left, bounds.Top);
+                    //((TextureBrush)_brush).WrapMode = System.Drawing.Drawing2D.WrapMode.Tile;
                 }
                 else
                 {
@@ -579,6 +588,7 @@ namespace SketchIt.Api
 
     public class FillParameters : ColorParameter
     {
+        public FillParameters() : base() { }
         public FillParameters(Color color) : base(color) { }
         public FillParameters(IImage image) : base(image) { }
     }
@@ -614,6 +624,7 @@ namespace SketchIt.Api
 
     public class FontParameters
     {
+        public Font Font { get; set; }
         public string Name { get; set; }
         public float? Size { get; set; }
         public bool? Bold { get; set; }
@@ -630,6 +641,11 @@ namespace SketchIt.Api
             Size = size;
             Bold = bold;
             Italic = italic;
+        }
+
+        public FontParameters(Font font)
+        {
+            Font = font;
         }
     }
 

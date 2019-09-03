@@ -49,6 +49,9 @@
 
         public const int DEGREES = 0;
         public const int RADIANS = 1;
+
+        public const int QUALITY = 0;
+        public const int PERFORMANCE = 1;
     }
 
     public enum AngleMode
@@ -78,6 +81,12 @@
         Corner = Constants.CORNER,
         Radius = Constants.RADIUS,
         Corners = Constants.CORNERS
+    }
+
+    public enum RenderPreference
+    {
+        Quality = Constants.QUALITY,
+        Performance = Constants.PERFORMANCE
     }
 
     public enum ImageMode

@@ -56,6 +56,7 @@ namespace SketchIt
         private new void Close()
         {
             //Program.MainForm.Activate();
+            _animation.Exit();
             base.Close();
         }
     }
@@ -125,6 +126,7 @@ namespace SketchIt
             ClearBackground();
             bg.SetColorMode(Constants.HSB);
             bg.SetStrokeWeight(1);
+            SetFrameRate(200);
         }
 
         float a = 10f;

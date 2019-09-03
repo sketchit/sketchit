@@ -19,7 +19,7 @@ namespace SketchIt
         private static object Locker = new object();
 
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

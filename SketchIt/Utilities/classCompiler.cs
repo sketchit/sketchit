@@ -35,7 +35,7 @@ namespace SketchIt.Utilities
                         continue;
                     }
 
-                    if ((line.StartsWith("using ") && sourceEmpty))
+                    if ((line.Trim().StartsWith("using ") && sourceEmpty && !line.Trim().Replace(" ", "").StartsWith("using(")))
                     {
                         for (int i = 0; i < temp; i++)
                         {
@@ -135,7 +135,8 @@ namespace SketchIt.Utilities
                 (fullPath ? Application.StartupPath + "\\" : "") + "SharpGL.dll",
                 (fullPath ? Application.StartupPath + "\\" : "") + "System.Drawing.Common.dll",
                 (fullPath ? Application.StartupPath + "\\" : "") + "netstandard.dll",
-                //(fullPath ? Application.StartupPath + "\\" : "") + "Svg.dll"
+                //(fullPath ? Application.StartupPath + "\\" : "") + "System.Data.dll",
+                //(fullPath ? Application.StartupPath + "\\" : "") + "System.Xml.dll"
             });
 
             foreach (ILibrary library in Program.GetLibraries())
@@ -217,11 +218,13 @@ namespace SketchIt.Utilities
                 Dictionary<string, string> options = new Dictionary<string, string>();
                 using (CSharpCodeProvider provider = new CSharpCodeProvider())
                 {
+                    string outputName = Program.MainForm.ProjectName ?? "sketch";
+
                     CompilerParameters parameters = new CompilerParameters(assemblyList.ToArray())
                     {
                         GenerateInMemory = IsBackgroundCompiler,
                         GenerateExecutable = !IsBackgroundCompiler,
-                        OutputAssembly = outputFolder + (IsBackgroundCompiler ? "\\sketch.tmp" : "\\sketch.exe"),
+                        OutputAssembly = outputFolder + (IsBackgroundCompiler ? $"\\{outputName}.tmp" : $"\\{outputName}.exe"),
                         CompilerOptions = "/target:winexe /optimize /win32icon:\"" + Application.StartupPath + "\\SketchIt.ico\"",
                     };
 
@@ -236,6 +239,11 @@ namespace SketchIt.Utilities
                         {
                             retries++;
                         }
+                    }
+
+                    foreach (ProjectFileReference resource in Program.MainForm.GetResourceFiles())
+                    {
+                        parameters.EmbeddedResources.Add(resource.Name);
                     }
 
                     if (!IsBackgroundCompiler)

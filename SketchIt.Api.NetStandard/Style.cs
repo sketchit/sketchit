@@ -60,6 +60,7 @@ namespace SketchIt.Api
     {
         public HorizontalAlignment TextHorizontalAlignment { get; set; } = HorizontalAlignment.Left;
         public VerticalAlignment TextVerticalAlignment { get; set; } = VerticalAlignment.Top;
+        public RenderPreference RenderPreference { get; set; } = RenderPreference.Quality;
         public ColorMode ColorMode { get; set; }
         public RectangleMode RectangleMode { get; set; }
         public EllipseMode EllipseMode { get; set; }
@@ -118,15 +119,18 @@ namespace SketchIt.Api
 
         public void SetFill(FillParameters parms)
         {
-            if (FillParameters != null) FillParameters.Dispose();
+            //if (FillParameters != null) FillParameters.Dispose();
             FillParameters = parms;
+            FillParameters.Disabled = false;
             FillParameters.Style = this;
         }
 
         public void SetStroke(StrokeParameters parms)
         {
-            parms.PenWidth = StrokeParameters.PenWidth;
+            float penWidth = StrokeParameters.PenWidth;
+            if (StrokeParameters != null) StrokeParameters.Dispose();
             StrokeParameters = parms;
+            StrokeParameters.PenWidth = penWidth;
             StrokeParameters.Style = this;
         }
 
@@ -168,7 +172,12 @@ namespace SketchIt.Api
             style |= bold ? FontStyle.Bold : FontStyle.Regular;
             style |= italic ? FontStyle.Italic : FontStyle.Regular;
 
-            Font = new Font(parms.Name, size, style);
+            SetFont(new Font(parms.Name, size, style));
+        }
+
+        public void SetFont(Font font)
+        {
+            Font = font;
         }
 
         public void SetColorMode(int mode) => SetColorMode((ColorMode)mode);

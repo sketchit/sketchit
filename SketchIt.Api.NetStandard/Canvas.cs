@@ -15,7 +15,7 @@ namespace SketchIt.Api
 
         public Sketch Sketch { get; private set; }
         public Point Location { get; private set; } = new Point();
-        public Style Style { get; private set; } = new Style();
+        public Style Style { get; set; } = new Style();
         public RendererBase Renderer { get; private set; }
 
         public void SetRenderer(Type rendererType)

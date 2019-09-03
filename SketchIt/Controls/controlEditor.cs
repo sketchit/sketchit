@@ -75,6 +75,7 @@ namespace SketchIt.Controls
             }
 
             Styles[Style.Default].Size = Settings.User.GetInt("editor.fontSize", 11);
+            Styles[Style.Default].Bold = Settings.User.GetBool("editor.fontBold", false);
             Styles[Style.Default].BackColor = AppearanceSettings.EditorBackColor;
             Styles[Style.Default].ForeColor = AppearanceSettings.EditorForeColor;
             StyleClearAll();

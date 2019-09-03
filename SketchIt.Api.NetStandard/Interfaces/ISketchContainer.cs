@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 
 namespace SketchIt.Api.Interfaces
 {
@@ -80,5 +81,12 @@ namespace SketchIt.Api.Interfaces
         IntPtr WindowHandle { get; }
 
         float Scale { get; }
+
+        string GetWindowCaption();
+        void SetWindowCaption(object caption);
+
+        Size GetScreenSize(int screenIndex = 0);
+        Size Size { get; }
+        bool IsStretched { get; }
     }
 }

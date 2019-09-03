@@ -2,6 +2,7 @@
 using SketchIt.Api.Interfaces;
 using SketchIt.Windows.Renderers;
 using System;
+using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
 using Drawing = System.Drawing;
@@ -12,12 +13,21 @@ namespace SketchIt.Windows
     {
         private delegate object GenericInvocationHandler(string method, params object[] args);
         private Drawing.Size _screenSize;
+        private IntPtr _outputHandle = IntPtr.Zero;
         private bool _paintRequested = false;
+        private string _windowCaption = "SketchIt";
         private int _mouseX;
         private int _mouseY;
 
         public SketchContainer()
+            : this(IntPtr.Zero)
         {
+        }
+
+        public SketchContainer(IntPtr outputHandle)
+        {
+            _outputHandle = outputHandle;
+
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             SetStyle(ControlStyles.UserPaint, true);
@@ -190,9 +200,20 @@ namespace SketchIt.Windows
         protected override void OnPaint(PaintEventArgs e)
         {
             if (Sketch == null) return;
-            if (!_paintRequested && Sketch.IsDrawing) return;
+            //if (!_paintRequested && Sketch.IsDrawing) return;
 
-            Sketch.Paint(e.Graphics, this.Size.Equals(_screenSize) ? _screenSize : Drawing.Size.Empty);
+            if (!_outputHandle.Equals(IntPtr.Zero))
+            {
+                using (Graphics graphics = Graphics.FromHwnd(_outputHandle))
+                {
+                    Sketch.Paint(graphics, this.Size.Equals(_screenSize) ? _screenSize : Drawing.Size.Empty);
+                }
+            }
+            else
+            {
+                Sketch.Paint(e.Graphics, this.Size.Equals(_screenSize) ? _screenSize : Drawing.Size.Empty);
+            }
+
             _paintRequested = false;
         }
 
@@ -233,12 +254,7 @@ namespace SketchIt.Windows
         {
             if (InvokeRequired)
             {
-                Invoke(new MethodInvoker(
-                    delegate
-                    {
-                        Size = new Drawing.Size(Sketch.Width, Sketch.Height);
-                    }
-                ));
+                Invoke(new MethodInvoker(() => Size = new Drawing.Size(Sketch.Width, Sketch.Height)));
             }
             else
             {
@@ -254,12 +270,15 @@ namespace SketchIt.Windows
 
         public void CenterScreen()
         {
-            Form form = FindForm();
-
-            if (form != null)
+            if (!DesignMode)
             {
-                Screen screen = Screen.FromHandle(form.Handle);
-                form.Location = new Drawing.Point((screen.Bounds.Width - form.Width) / 2, (screen.Bounds.Height - form.Height) / 2);
+                Form form = FindForm();
+
+                if (form != null)
+                {
+                    Screen screen = Screen.FromHandle(form.Handle);
+                    form.Location = new Drawing.Point((screen.Bounds.Width - form.Width) / 2, (screen.Bounds.Height - form.Height) / 2);
+                }
             }
         }
 
@@ -267,12 +286,7 @@ namespace SketchIt.Windows
         {
             if (InvokeRequired)
             {
-                Invoke(new MethodInvoker(
-                    delegate
-                    {
-                        HandleFullScreenRequested(stretch, screenIndex);
-                    }
-                ));
+                Invoke(new MethodInvoker(() => HandleFullScreenRequested(stretch, screenIndex)));
             }
             else
             {
@@ -280,11 +294,17 @@ namespace SketchIt.Windows
             }
         }
 
+        public Size GetScreenSize(int screenIndex = 0)
+        {
+            return Screen.AllScreens[screenIndex].Bounds.Size;
+        }
+
         private void HandleFullScreenRequested(bool stretch, int screenIndex)
         {
             Screen screen = screenIndex <= 0 ? Screen.FromControl(this) : Screen.AllScreens[screenIndex - 1];
 
             _screenSize = screen.Bounds.Size;
+            IsStretched = stretch;
 
             if (!DesignMode)
             {
@@ -318,6 +338,50 @@ namespace SketchIt.Windows
 
         public void RendererChanged(Type rendererType)
         {
+        }
+
+        public string GetWindowCaption()
+        {
+            return _windowCaption;
+        }
+
+        public void SetWindowCaption(object caption)
+        {
+            _windowCaption = caption.ToString();
+
+            if (FindForm() is Form form)
+            {
+                if (InvokeRequired)
+                {
+                    Invoke(new MethodInvoker(() =>
+                        {
+                            if (!DesignMode)
+                            {
+                                form.Text = _windowCaption;
+                            }
+                        }
+                    ));
+                }
+                else
+                {
+                    if (!DesignMode)
+                    {
+                        form.Text = _windowCaption;
+                    }
+                }
+            }
+        }
+
+        public bool IsStretched
+        {
+            get;
+            private set;
+        }
+
+        protected override void OnParentChanged(EventArgs e)
+        {
+            base.OnParentChanged(e);
+            SetWindowCaption(_windowCaption);
         }
     }
 }

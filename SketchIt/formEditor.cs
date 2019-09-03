@@ -149,7 +149,7 @@ namespace SketchIt
             base.OnClosing(e);
         }
 
-        internal void UpdateEditor()
+        internal void UpdateEditorKeywords()
         {
             Editor.SetKeywords(1, Program.Parser.KnownKeywords + " " + Program.Parser.ParsedKeywords);
             Editor.SetKeywords(3, Program.Parser.KnownTypes + " " + Program.Parser.ParsedTypes);

@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="AudioIn.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SoundFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Sound.ILibrary.cs" />

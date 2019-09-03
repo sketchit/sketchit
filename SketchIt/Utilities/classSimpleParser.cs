@@ -107,25 +107,36 @@ namespace SketchIt.Utilities
             KnownProperties = KnownProperties.Trim();
         }
 
-        public void Parse()
+        public void Parse(bool threaded = true)
         {
-            using (Status.Set("Please wait..."))
+            if (threaded)
             {
-                if (_parsing) return;
-
-                ParameterizedThreadStart threadStart = new ParameterizedThreadStart(DoParse);
-                Thread thread = new Thread(threadStart);
-
-                string text = "";
-
-                foreach (BaseForm form in Application.OpenForms)
+                using (Status.Set("Please wait..."))
                 {
-                    if (form.Type != WindowType.SourceFile) continue;
-                    text += ((EditorForm)form).EditorText + Environment.NewLine;
-                }
+                    if (_parsing) return;
 
-                thread.Start(text);
+                    ParameterizedThreadStart threadStart = new ParameterizedThreadStart(DoParse);
+                    Thread thread = new Thread(threadStart);
+                    thread.Start(GetSourceCodeText());
+                }
             }
+            else
+            {
+                DoParse(GetSourceCodeText());
+            }
+        }
+
+        private string GetSourceCodeText()
+        {
+            string result = "";
+
+            foreach (BaseForm form in Application.OpenForms)
+            {
+                if (form.Type != WindowType.SourceFile) continue;
+                result += ((EditorForm)form).EditorText + Environment.NewLine;
+            }
+
+            return result;
         }
 
         public SyntaxToken GetToken(int position)
@@ -305,7 +316,7 @@ namespace SketchIt.Utilities
                 for (int i = 0; i < Application.OpenForms.Count; i++)
                 {
                     if (!(Application.OpenForms[i] is BaseForm form) || form.Type != WindowType.SourceFile) continue;
-                    form.Invoke(new MethodInvoker(((EditorForm)form).UpdateEditor));
+                    form.Invoke(new MethodInvoker(((EditorForm)form).UpdateEditorKeywords));
                 }
 
                 ParseTime = DateTime.Now.Subtract(startTime);
@@ -375,9 +386,16 @@ namespace SketchIt.Utilities
             {
                 foreach (SyntaxNode node in SyntaxTree.GetCompilationUnitRoot().DescendantNodes())
                 {
-                    if (node is MethodDeclarationSyntax || node is ClassDeclarationSyntax)
+                    if (node is ClassDeclarationSyntax)
                     {
                         return false;
+                    }
+                    else if (node is MethodDeclarationSyntax method)
+                    {
+                        if ("Draw".Equals(method.Identifier.ValueText, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            return false;
+                        }
                     }
                 }
             }

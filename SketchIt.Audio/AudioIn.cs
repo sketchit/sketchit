@@ -4,8 +4,10 @@ using System;
 
 namespace SketchIt.Sound
 {
-    public static class ExtensionMethods
+    public static partial class ExtensionMethods
     {
+        static WaveOut _waveOut;
+
         public static AudioIn CreateAudioIn(this Applet applet)
         {
             return new AudioIn(applet);
@@ -14,22 +16,13 @@ namespace SketchIt.Sound
 
     public class AudioIn : IDisposable
     {
-        Applet _applet;
-        Sketch _sketch;
         WaveIn _device;
         bool _hasData;
         byte[] _data;
 
         public AudioIn(Applet applet)
         {
-            _applet = applet;
-            _sketch = applet.GetSketch();
-            _sketch.Exited += _sketch_Exited;
-        }
-
-        private void _sketch_Exited(object sender, EventArgs e)
-        {
-            Stop();
+            applet.GetSketch().Exited += (o, e) => Stop();
         }
 
         public void Start()

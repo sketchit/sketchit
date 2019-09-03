@@ -39,8 +39,8 @@ namespace SketchIt.Utilities
         public static Color EditorOperatorForeColor = Settings.User.GetColor("editor.operatorForeColor", Color.FromArgb(0xE0E0E0));
         public static Color EditorRegexForeColor = Settings.User.GetColor("editor.regexForeColor", Color.FromArgb(0xFF00FF));
         public static Color EditorCommentLineDocForeColor = Settings.User.GetColor("editor.commentLineDocForeColor", Color.FromArgb(0x77A7DB));
-        public static Color EditorWordForeColor = Settings.User.GetColor("editor.wordForeColor", Color.FromArgb(0x48A8EE));
-        public static Color EditorWord2ForeColor = Settings.User.GetColor("editor.word2ForeColor", Color.Teal); //Color.FromArgb(0xF98906);
+        public static Color EditorWordForeColor = Settings.User.GetColor("editor.wordForeColor", Color.FromArgb(200, 50, 150));
+        public static Color EditorWord2ForeColor = Settings.User.GetColor("editor.word2ForeColor", Color.FromArgb(200, 200, 50)); //Color.FromArgb(0xF98906);
         public static Color EditorCommentDocKeyWordForeColor = Settings.User.GetColor("editor.commentDocKeywordForeColor", Color.FromArgb(0xB3D991));
         public static Color EditorCommentDocKeywordErrorForeColor = Settings.User.GetColor("editor.commentDocKeywordErrorForeColor", Color.FromArgb(0xFF0000));
         public static Color EditorGlobalClassForeColor = Settings.User.GetColor("editor.globalClassForeColor", Color.FromArgb(100, 100, 200));//Color.FromArgb(0x48A8EE);
@@ -104,8 +104,8 @@ namespace SketchIt.Utilities
             EditorOperatorForeColor = Settings.User.GetColor("editor.operatorForeColor", Color.FromArgb(0xE0E0E0));
             EditorRegexForeColor = Settings.User.GetColor("editor.regexForeColor", Color.FromArgb(0xFF00FF));
             EditorCommentLineDocForeColor = Settings.User.GetColor("editor.commentLineDocForeColor", Color.FromArgb(0x77A7DB));
-            EditorWordForeColor = Settings.User.GetColor("editor.wordForeColor", Color.FromArgb(0x48A8EE));
-            EditorWord2ForeColor = Settings.User.GetColor("editor.word2ForeColor", Color.Teal); //Color.FromArgb(0xF98906);
+            EditorWordForeColor = Settings.User.GetColor("editor.wordForeColor", Color.FromArgb(200, 50, 150));
+            EditorWord2ForeColor = Settings.User.GetColor("editor.word2ForeColor", Color.FromArgb(200, 200, 50)); //Color.FromArgb(0xF98906);
             EditorCommentDocKeyWordForeColor = Settings.User.GetColor("editor.commentDocKeywordForeColor", Color.FromArgb(0xB3D991));
             EditorCommentDocKeywordErrorForeColor = Settings.User.GetColor("editor.commentDocKeywordErrorForeColor", Color.FromArgb(0xFF0000));
             EditorGlobalClassForeColor = Settings.User.GetColor("editor.globalClassForeColor", Color.FromArgb(100, 100, 200));//Color.FromArgb(0x48A8EE);

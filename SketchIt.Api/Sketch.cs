@@ -158,6 +158,7 @@ namespace SketchIt.Api
                 if (_methodSetup != null)
                 {
                     InvokeSetup();
+                    Container.Update();
                 }
 
                 if (_methodDraw != null && !_stopped)

@@ -147,7 +147,7 @@ namespace SketchIt {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             
-            if (args != null &amp;&amp; args.Length &gt; 0)
+            if (args != null &amp;amp;&amp;amp; args.Length &amp;gt; 0)
             {
                 switch (args[0].ToLower().Trim().Substring(0, 2))
                 {
@@ -228,6 +228,7 @@ namespace SketchIt {
         }
 
         private static void FormClosed(object sender, EventArgs e) {
+            SketchIt.Windows.Application.NoLoop();
         }
     }
 }</value>
@@ -245,10 +246,31 @@ namespace SketchIt {
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
+        static bool isPreview = false;
+        static IntPtr previewHandle = IntPtr.Zero;
 
         [STAThread]
-        static void Main() { 
-	        AllocConsole();
+        static void Main(string[] args) { 
+            if (args != null)
+            {
+                foreach (string arg in args)
+                {
+                    string[] vals = arg.ToLower().Split(new char[] { '=' });
+                    
+                    switch (vals[0])
+                    {
+                        case "preview":
+                            isPreview = true;
+                            previewHandle = new IntPtr(int.Parse(vals[1]));
+                            break;
+                    }
+                }
+            }
+
+            if (!isPreview)
+            {
+	            AllocConsole();
+            }
 
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
@@ -261,7 +283,7 @@ namespace SketchIt {
         private static Form CreateForm()
         {
             Form f = new Form();
-            SketchIt.Windows.SketchContainer container = new SketchIt.Windows.SketchContainer();
+            SketchIt.Windows.SketchContainer container = new SketchIt.Windows.SketchContainer(previewHandle);
 
             f.KeyPreview = true;
             f.Icon = container.Icon;
@@ -270,6 +292,7 @@ namespace SketchIt {
             f.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             f.MaximizeBox = false;
             f.FormBorderStyle = FormBorderStyle.FixedSingle;
+            f.WindowState = isPreview ? FormWindowState.Minimized : FormWindowState.Normal;
             f.Closed += FormClosed;
             f.KeyDown += KeyDown;
             container.Location = new Point(0, 0);
@@ -315,6 +338,7 @@ namespace SketchIt {
 
         private static void FormClosed(object sender, EventArgs e) {
             //SketchIt.Windows.Static.Canvas.Stop();
+            SketchIt.Windows.Application.NoLoop();
         }
     }
 }</value>

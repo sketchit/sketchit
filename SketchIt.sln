@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SketchIt.Sound", "SketchIt.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SketchIt.Windows.Renderers", "SketchIt.Windows.Renderers\SketchIt.Windows.Renderers.csproj", "{F30BD137-CD02-48F7-ABE7-02537F25268C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SketchIt.Api.NetStandard", "SketchIt.Api.NetStandard\SketchIt.Api.NetStandard.csproj", "{D568790A-A35A-418B-A98D-5D9E1688E71D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SketchIt.Api.NetStandard", "SketchIt.Api.NetStandard\SketchIt.Api.NetStandard.csproj", "{D568790A-A35A-418B-A98D-5D9E1688E71D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

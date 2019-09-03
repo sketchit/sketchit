@@ -7,8 +7,9 @@
     <Company>SketchIt</Company>
     <Authors>Ian Kloppers</Authors>
     <Copyright>© 2019 Ian Kloppers</Copyright>
-    <Version>0.2.1905.501</Version>
+    <Version>0.2.1909.301</Version>
     <PackageProjectUrl>http://www.sketchit.org</PackageProjectUrl>
+    <AssemblyVersion>0.2.1909.301</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
